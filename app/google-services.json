@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1035365111842",
+    "project_id": "dropex-c78c1",
+    "storage_bucket": "dropex-c78c1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1035365111842:android:1c8ee44d8102197dbb527b",
+        "android_client_info": {
+          "package_name": "com.example.dropex"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1035365111842-fmnr1lg4c7vjruh4glc6j29ja0egjt7l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.dropex",
+            "certificate_hash": "47af7083cff7e50748f730945d6521896922d311"
+          }
+        },
+        {
+          "client_id": "1035365111842-4rbkc23oru7ho4e2ic8r02c65tl4t4ac.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBm4U6KzxYErWsn2hDT1LHq8Pi0v0xSBE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1035365111842-4rbkc23oru7ho4e2ic8r02c65tl4t4ac.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
