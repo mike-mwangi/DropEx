@@ -14,11 +14,11 @@
         android:orientation="vertical">
 
         <ImageView
-            android:layout_width="130dp"
-            android:layout_height="130dp"
+            android:layout_width="296dp"
+            android:layout_height="208dp"
             android:layout_marginTop="80dp"
             android:contentDescription="OTP Verification"
-            />
+            android:src="@drawable/logo_no_bg" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -92,7 +92,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="30dp"
-                android:text="Get OTP"
+                android:text="Continue"
                 android:textStyle="bold" />
 
             <ProgressBar
