@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "1035365111842-ibe08pbnjm3f289tr3kvqtenqgk2rc70.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.dropex",
+            "certificate_hash": "8f7a430dd79ff2612a7ac07a4c0455c90a43ed56"
+          }
+        },
+        {
           "client_id": "1035365111842-4rbkc23oru7ho4e2ic8r02c65tl4t4ac.apps.googleusercontent.com",
           "client_type": 3
         }
