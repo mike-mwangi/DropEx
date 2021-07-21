@@ -35,6 +35,9 @@
         <item name="shapeAppearanceOverlay">?attr/shapeAppearanceLargeComponent</item>
     </style>
 
+
+
+
     <!--Navigation Drawer-->
     <style name="Widget.MyTheme.NavigationView" parent="Widget.MaterialComponents.NavigationView">
         <item name="itemTextAppearance">?attr/textAppearanceBody2</item>

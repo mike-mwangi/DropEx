@@ -57,7 +57,7 @@ public class OnboardingActivity extends AppCompatActivity implements OnboardingF
     @Override
     public void onNextClick() {
 
-            startActivity(new Intent(this, MainActivity.class));
+        startActivity(new Intent(this,SplashScreenActivity.class));
             SharedPref.getInstance(this.getApplicationContext()).setIsFirstLaunchToFalse();
             finish();
 
