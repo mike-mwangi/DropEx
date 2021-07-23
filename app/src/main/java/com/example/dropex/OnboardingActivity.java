@@ -3,11 +3,13 @@ package com.example.dropex;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager2.widget.ViewPager2;
 
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.TableLayout;
 
@@ -15,11 +17,14 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class OnboardingActivity extends AppCompatActivity implements OnboardingFragment.OnBoardingListener {
     private static int currentPage = 0;
     private static ArrayList<Fragment> fragments = new ArrayList<Fragment>();
     private ViewPager2 viewPager;
+    private OnBoardingViewPagerAdapter adapter;
 
 
     @Override
@@ -30,12 +35,11 @@ public class OnboardingActivity extends AppCompatActivity implements OnboardingF
         TabLayout tabLayout=findViewById(R.id.tab);
 
 
-
-        OnBoardingViewPagerAdapter adapter = new OnBoardingViewPagerAdapter(this.getSupportFragmentManager(),this.getLifecycle());
+        adapter = new OnBoardingViewPagerAdapter(this.getSupportFragmentManager(),this.getLifecycle());
         for (int i=1;i<=3;i++) {
             fragments.add(OnboardingFragment.newInstance(i, this));
         }
-        adapter.addFragments(fragments);
+        adapter.setFragments(fragments);
 
        viewPager.setAdapter(adapter);
 
@@ -50,8 +54,50 @@ public class OnboardingActivity extends AppCompatActivity implements OnboardingF
         new TabLayoutMediator(tabLayout, viewPager,
                 (tab, position) -> tab.setText("")
         ).attach();
+
+
+        autoScroll(150);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+   adapter.setFragments(null);
+    }
+
+
+    public  void autoScroll (int interval) {
+
+        final Handler mHandler = new Handler();
+        final Runnable mUpdateResults = new Runnable() {
+            int page=0;
+            public void run() {
+                int numPages = 3;
+                page = (page + 1) % numPages;
+                viewPager.setCurrentItem(page);
+
+
+
+            }
+        };
+
+        int delay = 1000; // delay for 1 sec.
+
+        int period = 4000; // repeat every 4 sec.
+
+        Timer timer = new Timer();
+
+        timer.scheduleAtFixedRate(new TimerTask() {
+
+            public void run() {
+
+
+                mHandler.post(mUpdateResults);
+
+            }
+
+        }, delay, period);
+    }
 
     // open the main screen when next is tapped on the last screen
     @Override

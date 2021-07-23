@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(this,OnboardingActivity.class));
             finish();
         }
-        else if(currentUser != null){
+        else if(currentUser!= null){
             startActivity(new Intent(this,HomeActivity.class));
             finish();
         }

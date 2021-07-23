@@ -7,18 +7,24 @@
     tools:context=".HomeActivity">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:theme="@style/Theme.MyApp.AppBarOverlay">
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyTheme.RoundComponent"
+       >
 
-        <androidx.appcompat.widget.Toolbar
+
+        <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-          />
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            app:shapeAppearance="@style/ShapeAppearanceOverlay.MyTheme.RoundComponent" />
+
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <include layout="@layout/content_home" />
+    <include layout="@layout/content_home"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

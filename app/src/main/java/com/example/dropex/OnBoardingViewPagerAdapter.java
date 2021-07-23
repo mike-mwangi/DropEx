@@ -1,10 +1,13 @@
 package com.example.dropex;
 
+import android.os.Handler;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.lifecycle.Lifecycle;
+import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import java.util.ArrayList;
@@ -29,7 +32,10 @@ public class OnBoardingViewPagerAdapter extends FragmentStateAdapter {
     }
 
 
-    public void  addFragments( ArrayList<Fragment> fragments) {
-        this.fragments = fragments;
+
+
+
+    public void setFragments(ArrayList<Fragment> fragments) {
+        this.fragments=fragments;
     }
 }

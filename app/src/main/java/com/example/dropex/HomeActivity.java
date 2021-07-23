@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Menu;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.widget.Toolbar;
@@ -24,6 +25,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.firebase.auth.FirebaseAuth;
 
 import static com.example.dropex.Common.Common.buildWelcomeMessage;
+import static com.example.dropex.Common.Common.currentCustomer;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -66,7 +68,7 @@ public class HomeActivity extends AppCompatActivity {
             if (item.getItemId() == R.id.nav_sign_out) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
                 builder.setTitle("Sign out")
-                        .setMessage("Are you sure you want to sign out>")
+                        .setMessage("Are you sure you want to sign out?")
                         .setNegativeButton("CANCEL", (dialogInterface, i) -> dialogInterface.dismiss())
                         .setPositiveButton("SIGN OUT", (dialogInterface, i) -> {
                             FirebaseAuth.getInstance().signOut();
@@ -76,12 +78,6 @@ public class HomeActivity extends AppCompatActivity {
                             finish();
                         }).setCancelable(false);
                 AlertDialog dialog = builder.create();
-                dialog.setOnShowListener(dialogInterface -> {
-                    dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                            .setTextColor(ContextCompat.getColor(HomeActivity.this, android.R.color.holo_red_dark));
-                    dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
-                            .setTextColor(ContextCompat.getColor(HomeActivity.this, R.color.colorPrimary));
-                });
 
                 dialog.show();
             }
@@ -97,22 +93,22 @@ public class HomeActivity extends AppCompatActivity {
 
         img_avatar = (ImageView)headerView.findViewById(R.id.user_avatar);
 
-        text_name.setText(buildWelcomeMessage());
+        text_name.setText(currentCustomer.getFirstName()+" "+currentCustomer.getLastName());
 
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.options_menu, menu);
-        return true;
-    }
+
 
     @Override
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_home);
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
+    }
+
+    public void showProfileAFragment(View view) {
+        startActivity(new Intent(HomeActivity.this,ProfileActivity.class));
+        finish();
     }
 }

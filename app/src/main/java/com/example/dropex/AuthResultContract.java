@@ -26,7 +26,8 @@ public class AuthResultContract extends ActivityResultContract<Integer, IdpRespo
     public Intent createIntent(@NonNull @NotNull Context context, Integer input) {
         AuthMethodPickerLayout authMethodPickerLayout = new AuthMethodPickerLayout
                 .Builder(R.layout.layout_sign_in)
-                .setPhoneButtonId(R.id.btn_phone_login).build();
+                .setPhoneButtonId(R.id.btn_phone_login)
+                .build();
 
 
 
@@ -35,7 +36,6 @@ public class AuthResultContract extends ActivityResultContract<Integer, IdpRespo
                 .setAuthMethodPickerLayout(authMethodPickerLayout)
                 .setIsSmartLockEnabled(false)
                 .setTheme(R.style.Theme_MyApp)
-
                 .setAvailableProviders(providers)
                 .build();
 

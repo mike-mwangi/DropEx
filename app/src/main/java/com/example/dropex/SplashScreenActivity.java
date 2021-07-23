@@ -85,8 +85,21 @@ public class SplashScreenActivity extends AppCompatActivity {
         progressBar=findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.INVISIBLE);
 
-        init();
-        firebaseAuth.addAuthStateListener(listener);
+        if(isFirstLaunch()) {
+            startActivity(new Intent(this,OnboardingActivity.class));
+            finish();
+        }
+        else {
+
+
+            init();
+            firebaseAuth.addAuthStateListener(listener);
+        }
+
+
+
+
+
 
 
     }
@@ -113,6 +126,7 @@ public class SplashScreenActivity extends AppCompatActivity {
 
 
         firebaseAuth = FirebaseAuth.getInstance();
+        user=firebaseAuth.getCurrentUser();
         listener = myFirebaseAuth -> {
 
             if (user != null) {
@@ -196,6 +210,8 @@ public class SplashScreenActivity extends AppCompatActivity {
         startActivity(new Intent(SplashScreenActivity.this, HomeActivity.class));
         finish();
     }
-
+    private Boolean isFirstLaunch() {
+        return SharedPref.getInstance(this.getApplicationContext()).isFirstLaunch();
+    }
 
 }
