@@ -54,4 +54,10 @@
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="menu_profile">Profile</string>
+    <string name="fname_label">First name</string>
+    <string name="surname_label">Surname</string>
+    <string name="phone_label">Phone number</string>
+    <string name="email_label">Email</string>
+    <string name="verified_label">Verified</string>
+    <string name="save">Save</string>
 </resources>
