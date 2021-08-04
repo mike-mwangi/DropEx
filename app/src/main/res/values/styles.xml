@@ -43,6 +43,14 @@
         <item name="itemTextAppearance">?attr/textAppearanceBody2</item>
     </style>
 
+<!--    Horizontal line-->
+    <style name="Divider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">?android:attr/listDivider</item>
+    </style>
+
+
 
     <dimen name="button_border_radius">20sp</dimen>
 </resources>
