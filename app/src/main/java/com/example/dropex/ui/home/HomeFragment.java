@@ -111,7 +111,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     }
 
     @Override
-    public void onMapReady(@NonNull @NotNull GoogleMap googleMap) {
+    public void onMapReady(@NonNull GoogleMap googleMap) {
 
         mMap = googleMap;
         //Request for permission to add the users current location
