@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
+// TODO: uniform start button through out
+
+// TODO: fix the error that occurs when you change system theme
 public class OnboardingActivity extends AppCompatActivity implements OnboardingFragment.OnBoardingListener {
     private static int currentPage = 0;
     private static ArrayList<Fragment> fragments = new ArrayList<Fragment>();

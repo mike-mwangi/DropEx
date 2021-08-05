@@ -136,6 +136,7 @@ public class RegisterFragment extends Fragment {
                     dialog.dismiss();
                     goToHomeActivity(model);
                 });
+                // TODO: add email verification
 
             }
         });
