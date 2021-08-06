@@ -1,7 +1,15 @@
 package com.example.dropex.Model;
 
 public class CustomerModel {
-    private String firstName, lastName, phoneNumber, email;
+    private String firstName, lastName, phoneNumber, email,userImageUrl;
+
+    public String getUserImageUrl() {
+        return userImageUrl;
+    }
+
+    public void setUserImageUrl(String userImageUrl) {
+        this.userImageUrl = userImageUrl;
+    }
 
     public CustomerModel() {
     }
