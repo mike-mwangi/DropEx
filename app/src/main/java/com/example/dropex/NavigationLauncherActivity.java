@@ -408,13 +408,7 @@ localeUtils=new LocaleUtils();
         dialog.show();
     }
 
-    private void fetchVrpSolution(String jobId, String vehicleId) {
-        currentJobId = jobId;
-        currentVehicleId = vehicleId;
 
-     //   showLoading();
-        new FetchSolutionTask(this, getString(R.string.gh_key)).execute(new FetchSolutionConfig(currentJobId, currentVehicleId));
-    }
 
     @Override
     public void onPause() {
@@ -865,6 +859,13 @@ localeUtils=new LocaleUtils();
         GeocodingInputDialog dialog = new GeocodingInputDialog();
         dialog.setGeocodingInput(currentGeocodingInput);
         dialog.show(getFragmentManager(), "gh-example");
+    }
+    private void fetchVrpSolution(String jobId, String vehicleId) {
+        currentJobId = jobId;
+        currentVehicleId = vehicleId;
+
+        //   showLoading();
+        new FetchSolutionTask(this, getString(R.string.gh_key)).execute(new FetchSolutionConfig(currentJobId, currentVehicleId));
     }
 
     @Override

@@ -1,7 +1,27 @@
 package com.example.dropex.Model;
 
+import java.util.ArrayList;
+
 public class CustomerModel {
     private String firstName, lastName, phoneNumber, email,userImageUrl;
+    private ArrayList<Job> jobs;
+    private Job currentJob;
+
+    public Job getCurrentJob() {
+        return currentJob;
+    }
+
+    public void setCurrentJob(Job currentJob) {
+        this.currentJob = currentJob;
+    }
+
+    public ArrayList<Job> getJobs() {
+        return jobs;
+    }
+
+    public void setJobs(ArrayList<Job> jobs) {
+        this.jobs = jobs;
+    }
 
     public String getUserImageUrl() {
         return userImageUrl;

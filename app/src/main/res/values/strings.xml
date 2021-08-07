@@ -54,6 +54,7 @@
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="menu_profile">Profile</string>
+
     <string name="fname_label">First name</string>
     <string name="surname_label">Surname</string>
     <string name="phone_label">Phone number</string>
@@ -117,4 +118,27 @@
 
     <string name="open_gh_maps">Open Route from GH Maps</string>
     <string name="open_vrp_solution">Open VRP Solution</string>
+    =======
+    <string name="fulfil_your_deliveries_text">Fulfil your deliveries hassle-free</string>
+    <string name="welcome_user_text">Welcome John Doe</string>
+    <string name="user_avatar_image">User avatar image</string>
+    <string name="package_delivered_safely_header">Get your package delivered safely with us</string>
+    <string name="personal_and_business_subHeader">For all your personal and business needs</string>
+    <string name="receive_package_icon_img_description">Receive package icon</string>
+    <string name="receive_textView">Receive</string>
+    <string name="deliver_package_icon_img_description">Deliver package icon</string>
+    <string name="deliver_textView">Deliver</string>
+    <string name="background_circle_banner">background_circle_banner</string>
+    <string name="banner_illustration">banner_illustration</string>
+    <string name="discount_textView">15% Discount</string>
+    <string name="discount_date_textView">1 July - 20 July</string>
+    <string name="send_package">Send package(s)</string>
+    <string name="explain_send_package">Deliver Items such as gifts,order,documents etc</string>
+    <string name="label_cta" />
+    <string name="job_information" />
+    <string name="shipping_information" />
+    <string name="number_of_packages">amounr</string>
+    <string name="next">Next</string>
+    <string name="pickup_location">Pickup Location</string>
+
 </resources>

@@ -53,6 +53,9 @@
         <activity
             android:name=".ui.main.OnboardingActivity"
             android:theme="@style/Theme.MyApp.NoActionBar" />
+        <activity
+            android:name=".ui.shipments.main.CallToActionActivity"
+            />
         <activity android:name=".ui.home.HomeActivity" >
 
         </activity>

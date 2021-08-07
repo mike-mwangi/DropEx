@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/shipping_navigation"
+    app:startDestination="@id/CTAFragment">
+    <fragment
+        android:id="@+id/CTAFragment"
+        android:name="com.example.dropex.ui.shipments.main.CallToActionFragment"
+        android:label="@string/label_cta"
+        tools:layout="@layout/fragment_call_to_action" >
+        <action
+            android:id="@+id/action_CTAFragment_to_jobInformation"
+            app:destination="@id/JobInformation" />
+    </fragment>
+    <fragment
+        android:id="@+id/JobInformation"
+        android:name="com.example.dropex.ui.shipments.main.JobInformationFragment"
+        android:label="@string/job_information"
+        tools:layout="@layout/fragment_job_information"
+        >
+        <action
+            android:id="@+id/action_JobInformation_to_ShippingInformation"
+            app:destination="@id/ShippingInformation" >
+            <argument
+                android:name="numberOfShipments"
+                app:argType="integer"
+                android:defaultValue="1" />
+
+        </action>
+    </fragment>
+    <fragment
+        android:id="@+id/ShippingInformation"
+        android:name="com.example.dropex.ui.shipments.main.ShippingInformationFragment"
+        android:label="@string/shipping_information"
+        tools:layout="@layout/fragment_shipping_information"
+        >
+        <argument
+            android:name="numberOfShipments"
+            app:argType="integer"
+            android:defaultValue="1" />
+    </fragment>
+
+
+
+</navigation>

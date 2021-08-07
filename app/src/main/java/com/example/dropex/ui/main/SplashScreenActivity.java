@@ -20,6 +20,7 @@ import com.example.dropex.NavigationLauncherActivity;
 import com.example.dropex.R;
 import com.example.dropex.SharedPref;
 import com.example.dropex.ui.home.HomeActivity;
+import com.example.dropex.ui.shipments.main.CallToActionActivity;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
@@ -191,7 +192,7 @@ public class SplashScreenActivity extends AppCompatActivity {
 
     private void goToHomeActivity(CustomerModel customerModel) {
         Common.currentCustomer = customerModel;
-        startActivity(new Intent(SplashScreenActivity.this, NavigationLauncherActivity.class));
+        startActivity(new Intent(SplashScreenActivity.this, CallToActionActivity.class));
         overridePendingTransition(R.anim.fade_in,R.anim.fade_out);
         finish();
     }

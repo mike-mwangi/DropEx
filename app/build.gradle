@@ -1,8 +1,9 @@
 plugins {
     id 'com.android.application'
     id 'com.google.gms.google-services'
-}
 
+}
+apply plugin: "androidx.navigation.safeargs"
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
@@ -72,10 +73,15 @@ dependencies {
 //graphhopper
     implementation 'com.graphhopper:graphhopper-navigation-android-ui:0.1.0-SNAPSHOT'
     implementation 'com.graphhopper:directions-api-client:0.10.1-4'
+
+
 //glide
     implementation 'com.github.bumptech.glide:glide:4.9.0'
+    //tomtom
 
-    //mapbox dependencies
+
+    //gson
+    implementation 'com.google.code.gson:gson:2.8.6'
 
  /*  implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.6.2'
     implementation 'com.mapbox.mapboxsdk:mapbox-sdk-turf:5.9.0-alpha.1'
