@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- This needs to start with pk. and must not be empty -->
+    <string name="mapbox_access_token" translatable="false">pk.eyJ1IjoibS1ndWRsZSIsImEiOiJja3JudWRzemQ0a292MnVwODM5bG83anEyIn0.Iz9TzaplandHcIzYpFx92A</string>
+    <!-- This is your GH key, register one at https://www.graphhopper.com/ -->
+    <string name="gh_key" translatable="false">c9a37a2f-6bfd-4c87-9bf9-b482e64dfbee</string>
+    <!-- This is the endpoint for the routing API, please note this endpoint might change in the future, please contact GraphHopper if you want to publish an app using this endpoint-->
+    <string name="base_url" translatable="false">https://graphhopper.com/api/1/navigate/</string>
+
+    <!-- These are the map style urls, you can get a key at mapilion.com -->
+    <!-- The style used for regular map viewing and route planning -->
+    <string name="map_view_styleUrl" translatable="false">https://mapilion-vector-and-raster-map-tiles.p.rapidapi.com/rapid-api/stylejson/osm-bright?x-rapidapi-key=015fb0e94cmsh9906b90133066fbp10ef91jsndd3633ede5bb</string>
+    <!-- The "day" style used for navigation -->
+    <string name="navigation_guidance_day" translatable="false">https://mapilion-vector-and-raster-map-tiles.p.rapidapi.com/rapid-api/stylejson/osm-bright?x-rapidapi-key=015fb0e94cmsh9906b90133066fbp10ef91jsndd3633ede5bb</string>
+    <!-- The "night" style used for navigation -->
+    <string name="navigation_guidance_night" translatable="false">https://mapilion-vector-and-raster-map-tiles.p.rapidapi.com/rapid-api/stylejson/osm-bright?x-rapidapi-key=015fb0e94cmsh9906b90133066fbp10ef91jsndd3633ede5bb</string>
+</resources>

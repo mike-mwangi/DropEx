@@ -1,2 +1,3 @@
 rootProject.name = "DropEx"
 include ':app'
+include ':driverapplication'
