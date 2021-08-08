@@ -6,6 +6,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -14,6 +16,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.dropex.FetchGeocodingConfig;
@@ -52,7 +56,7 @@ import timber.log.Timber;
 import static com.example.dropex.Common.Common.currentCustomer;
 
 
-public class ShippingItemFragment extends Fragment implements FetchGeocodingTaskCallbackInterface {
+public class ShippingItemFragment extends Fragment implements FetchGeocodingTaskCallbackInterface, AutoCompleteAdapter.OnItemClickListener{
 
     private static final String FRAGMENT_NUMBER = "param1";
 
@@ -60,13 +64,13 @@ public class ShippingItemFragment extends Fragment implements FetchGeocodingTask
     private TextInputEditText deliveryAddress;
     private TextInputEditText itemNote;
     private MaterialButton button;
-    private AutoCompleteTextView autoCompleteTextView;
-    private AutoCompleteAdapter autoCompleteAdapter;
+    private EditText locationInput;
     private ArrayList<GeocodingLocation> locations;
+    private GeocodingLocation deliveryLocation;
+    private GeocodingLocation pickuplocation;
 
     private int itemNumber;
-
-
+    private AutoCompleteAdapter autoCompleteAdapter1;
 
 
     public static ShippingItemFragment newInstance(int itemNumber) {
@@ -92,50 +96,30 @@ public class ShippingItemFragment extends Fragment implements FetchGeocodingTask
     @Override
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        deliveryAddress=view.findViewById(R.id.delivery_address_input);
         itemNote=view.findViewById(R.id.item_note_input);
-        button=view.findViewById(R.id.btn_next_item);
-        autoCompleteTextView=view.findViewById(R.id.txtAutoSearch);
+       // button=view.findViewById(R.id.btn_next_item);
+       locationInput=view.findViewById(R.id.location_input);
+
         locations= new ArrayList<>();
-        autoCompleteAdapter = new AutoCompleteAdapter(getContext(), R.layout.location_list_item,locations);
-        autoCompleteAdapter.setNotifyOnChange(true);
-      autoCompleteTextView.setAdapter(autoCompleteAdapter);
-        autoCompleteTextView.addTextChangedListener(new TextWatcher() {
+        RecyclerView recyclerView = view.findViewById(R.id.location_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setHasFixedSize(true);
 
-            private boolean shouldAutoComplete = false;
+        autoCompleteAdapter1= new AutoCompleteAdapter();
+        recyclerView.setAdapter(autoCompleteAdapter1);
 
+      autoCompleteAdapter1.setOnItemClickListener(this);
+
+        ImageButton searchButton=view.findViewById(R.id.search_btn);
+
+        searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(s.length()>4) {
-                    shouldAutoComplete = true;
-                }
-
+            public void onClick(View v) {
+                String address=locationInput.getText().toString();
+                new FetchGeocodingTask(ShippingItemFragment.this,getString(R.string.gh_key)).execute(new FetchGeocodingConfig(address, "en", 5, false, "-1.2778285,36.8486", "default"));
             }
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (shouldAutoComplete) {
-                    new FetchGeocodingTask(ShippingItemFragment.this,getString(R.string.gh_key)).execute(new FetchGeocodingConfig(s.toString(), "en", 5, false, "-1.2778285,36.8486", "default"));
-                }
-            }
-
         });
 
-
-
-        if(itemNumber==-1) {
-            button.setText("FINISH");
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                }
-            });
-        }
 
         }
 
@@ -158,6 +142,31 @@ public class ShippingItemFragment extends Fragment implements FetchGeocodingTask
         Stop stop=new Stop();
         Address address=new Address();
 
+        address.setLat(deliveryLocation.getPoint().getLat());
+        address.setLon(deliveryLocation.getPoint().getLng());
+        address.setName(deliveryLocation.getName());
+
+        stop.setAddress(address);
+
+    /*    Stop stop1=new Stop();
+        Address address1=new Address();
+
+        address1.setLat(pickuplocation.getPoint().getLat());
+        address1.setLon(pickuplocation.getPoint().getLng());
+        address1.setName(pickuplocation.getName());
+
+        stop1.setAddress(address1);
+
+     */
+
+
+        shipment.setDelivery(stop);
+      //  shipment.setPickup(stop1);
+        shipment.setId("myshipmentid");
+        shipment.setName("pickup and deliver to me");
+        long maxT=9222036;
+        shipment.setMaxTimeInVehicle(maxT);
+
         return shipment;
     }
 
@@ -171,9 +180,15 @@ public class ShippingItemFragment extends Fragment implements FetchGeocodingTask
 
 
 
- autoCompleteAdapter.setLocations((ArrayList<GeocodingLocation>) points);
- 
+ autoCompleteAdapter1.setLocations((ArrayList<GeocodingLocation>) points);
 
-        Log.e("GEOCODE",points.toString());
+ //deliveryLocation=points.get(0);
+ //pickuplocation=points.get(2);
+       // Log.e("GEOCODE",points.toString());
+    }
+
+    @Override
+    public void onItemClick(GeocodingLocation location) {
+        deliveryLocation=location;
     }
 }

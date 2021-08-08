@@ -8,16 +8,18 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.dropex.R;
 import com.graphhopper.directions.api.client.model.GeocodingLocation;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 
-public class AutoCompleteAdapter  extends ArrayAdapter<GeocodingLocation> {
-
-    private ArrayList<GeocodingLocation> locations=new ArrayList<>();
-    private static LayoutInflater inflater = null;
+public class AutoCompleteAdapter  extends RecyclerView.Adapter<AutoCompleteAdapter.ViewHolder> {
+private ArrayList<GeocodingLocation> locations=new ArrayList<>();
+    private OnItemClickListener listener;
 
     public ArrayList<GeocodingLocation> getLocations() {
         return locations;
@@ -28,63 +30,50 @@ public class AutoCompleteAdapter  extends ArrayAdapter<GeocodingLocation> {
         notifyDataSetChanged();
     }
 
-    public AutoCompleteAdapter(@NonNull Context context, int resource, @NonNull ArrayList<GeocodingLocation> objects) {
-        super(context, resource, objects);
-        inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        locations=objects;
-    }
-
-    public int getCount() {
-        return locations.size();
-    }
-
-    public long getItemId(int position) {
-        return position;
-    }
-
-    public GeocodingLocation getCurrentLocation(int position) {
-        return locations.get(position);
-    }
-
-    public void removeItem(int position) {
-        locations.remove(position);
-    }
-
-    public static class ViewHolder {
-        public TextView txtName;
-        public TextView txtProfession;
+    @NonNull
+    @NotNull
+    @Override
+    public AutoCompleteAdapter.ViewHolder onCreateViewHolder(@NonNull @NotNull ViewGroup parent, int viewType) {
+        View itemView = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.location_list_item, parent, false);
+        return new ViewHolder(itemView);
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View vi = convertView;
-        ViewHolder holder;
-        if (convertView == null) {
-            vi = inflater.inflate(R.layout.location_list_item, null);
+    public void onBindViewHolder(@NonNull @NotNull AutoCompleteAdapter.ViewHolder holder, int position) {
+        GeocodingLocation currentLocation=locations.get(position);
+        holder.locationName.setText(currentLocation.getName());
+        holder.locationHint.setText(currentLocation.getStreet());
+    }
 
+    @Override
+    public int getItemCount() {
+        return locations.size();
+    }
 
-            holder = new ViewHolder();
-            holder.txtName = (TextView) vi.findViewById(R.id.location_name);
-            holder.txtProfession = (TextView) vi.findViewById(R.id.location_desc);
+    public class ViewHolder extends RecyclerView.ViewHolder{
+        public TextView locationName;
+        public TextView locationHint;
+        public ViewHolder(@NonNull @NotNull View itemView) {
+            super(itemView);
+            locationName=itemView.findViewById(R.id.location_name);
+            locationHint=itemView.findViewById(R.id.location_desc);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int position = getAbsoluteAdapterPosition();
+                    if (listener != null && position != RecyclerView.NO_POSITION) {
+                        listener.onItemClick(locations.get(position));
+                    }
+                }
+            });
 
-            vi.setTag(holder);
-        } else {
-            holder = (ViewHolder) vi.getTag();
         }
-
-        GeocodingLocation o = locations.get(position);
-
-        if (o.getName() != null) {
-            holder.txtName.setText(o.getName());
-        } else {
-            holder.txtName.setText("N/A");
-        }
-
-        if (o.getStreet() != null) {
-            holder.txtProfession.setText(o.getStreet());
-        } else {
-            holder.txtProfession.setText("N/A");
-        }
-        return vi;
+    }
+    public interface OnItemClickListener {
+        void onItemClick(GeocodingLocation location);
+    }
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
     }
 }

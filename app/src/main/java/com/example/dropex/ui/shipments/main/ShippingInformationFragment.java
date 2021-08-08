@@ -1,5 +1,7 @@
 package com.example.dropex.ui.shipments.main;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -9,11 +11,13 @@ import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.example.dropex.NavigationLauncherActivity;
 import com.example.dropex.R;
 
 import com.example.dropex.ui.main.OnboardingFragment;
@@ -141,12 +145,11 @@ public class ShippingInformationFragment extends Fragment implements View.OnClic
                 }
                 currentCustomer.getCurrentJob().setShipments(shipments);
                 Gson gson=new Gson();
-                final String s = gson.toJson(currentCustomer.getCurrentJob());
-                currentCustomer.getCurrentJob().postToGraphhopper(s);
+                final String s =currentCustomer.getCurrentJob().buildJsonRequest();
+                currentCustomer.getCurrentJob().postToGraphhopper(s,this.getActivity());
 
-                NavDirections action =
-                        CallToActionFragmentDirections.actionCTAFragmentToJobInformation();
-                Navigation.findNavController(v).navigate(action);
+
+
 
                 break;
 

@@ -353,6 +353,7 @@ localeUtils=new LocaleUtils();
                         clearRoute();
                         //Open Vrp Url
                         List<String> pathSegments = data.getPathSegments();
+                        Log.e("job id in navlauncher",pathSegments.get(pathSegments.size()-1));
                         fetchVrpSolution(pathSegments.get(pathSegments.size() - 1), data.getQueryParameter("vehicle_id"));
                     }
                 }
