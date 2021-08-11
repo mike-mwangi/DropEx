@@ -64,6 +64,7 @@ private ArrayList<GeocodingLocation> locations=new ArrayList<>();
                     int position = getAbsoluteAdapterPosition();
                     if (listener != null && position != RecyclerView.NO_POSITION) {
                         listener.onItemClick(locations.get(position));
+
                     }
                 }
             });

@@ -78,14 +78,14 @@ public class ProfileFragment extends Fragment{
         fname_text=view.findViewById(R.id.text_fname);
         surname_text=view.findViewById(R.id.text_surname);
 
-email_text.setText(currentCustomer.getEmail());
-phone_text.setText(currentCustomer.getPhoneNumber());
-fname_text.setText(currentCustomer.getFirstName());
-surname_text.setText(currentCustomer.getLastName());
+        email_text.setText(currentCustomer.getEmail());
+        phone_text.setText(currentCustomer.getPhoneNumber());
+        fname_text.setText(currentCustomer.getFirstName());
+        surname_text.setText(currentCustomer.getLastName());
 
         Glide
                 .with(getContext())
-                .load("gs://dropex-c78c1.appspot.com/user/profile-images/+254722346606.jpg")
+                .load(currentCustomer.getUserImageUrl())
                 .into(user_avatar);
 
 

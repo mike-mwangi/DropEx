@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="32dp"
         android:text="@string/delivery_info"
         android:textAppearance="?attr/textAppearanceHeadline5"
         app:layout_constraintStart_toStartOf="parent"
@@ -24,7 +24,8 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="24dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/delivery_info">
+        app:layout_constraintTop_toBottomOf="@id/delivery_info"
+        app:errorEnabled="true">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/name_of_recipient"
@@ -34,7 +35,8 @@
             android:selectAllOnFocus="true"
             android:singleLine="true"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:errorEnabled="true"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -57,18 +59,20 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/name_of_recipient_layout">
+        app:layout_constraintTop_toBottomOf="@id/name_of_recipient_layout"
+        app:errorEnabled="true">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/receiver_phone_number_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/recipient_phone_number"
-            android:inputType="number"
+            android:inputType="text"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+          />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -79,7 +83,8 @@
         android:layout_marginTop="8dp"
         android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/receiver_phone_number_layout">
+        app:layout_constraintTop_toBottomOf="@id/receiver_phone_number_layout"
+        app:errorEnabled="true">
 
 
         <com.google.android.material.textfield.TextInputEditText
@@ -87,7 +92,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:hint="@string/delivery_address">
+            android:hint="@string/delivery_address"
+            >
         </com.google.android.material.textfield.TextInputEditText>
         <ImageButton
             android:id="@+id/search_btn"
@@ -118,6 +124,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.chip.ChipGroup
+        android:id="@+id/size_input_chips"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -153,6 +160,7 @@
 
 
     </com.google.android.material.chip.ChipGroup>
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

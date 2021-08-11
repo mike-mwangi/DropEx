@@ -35,10 +35,31 @@
         android:label="@string/shipping_information"
         tools:layout="@layout/fragment_shipping_information"
         >
+
         <argument
             android:name="numberOfShipments"
             app:argType="integer"
             android:defaultValue="1" />
+        <action
+            android:id="@+id/action_ShippingInformation_to_MeansOfTransport"
+            app:destination="@id/MeansOfTransport" >
+            <argument
+                android:name="cost"
+                app:argType="integer"
+                android:defaultValue="1" />
+        </action>
+    </fragment>
+    <fragment
+        android:id="@+id/MeansOfTransport"
+        android:name="com.example.dropex.ui.shipments.main.MeansOfTransportFragment"
+        android:label="@string/mot_information"
+        tools:layout="@layout/fragment_means_of_transport"
+        >
+        <argument
+            android:name="cost"
+            app:argType="integer"
+            android:defaultValue="1" />
+
     </fragment>
 
 

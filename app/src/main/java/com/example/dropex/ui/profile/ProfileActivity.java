@@ -18,14 +18,18 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import com.example.dropex.Common.Common;
 import com.example.dropex.R;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -37,6 +41,8 @@ import com.google.firebase.storage.UploadTask;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.example.dropex.Common.Common.currentCustomer;
 
@@ -91,8 +97,8 @@ public class ProfileActivity extends AppCompatActivity implements ProfileFragmen
         switch (v.getId()){
             case R.id.fname:
 
-EditProfileFragment fragment=EditProfileFragment.newInstance(getResources().getString(R.string.fname_label),currentCustomer.getFirstName(),this);
-fragment.setEditListener(this);
+        EditProfileFragment fragment=EditProfileFragment.newInstance(getResources().getString(R.string.fname_label),currentCustomer.getFirstName(),this);
+        fragment.setEditListener(this);
 
                 ft.replace(R.id.fragment_placeholder,  fragment)
                 .addToBackStack(null);
@@ -158,6 +164,7 @@ fragment.setEditListener(this);
         database = FirebaseDatabase.getInstance("https://dropex-c78c1-default-rtdb.firebaseio.com/");
         customerInfoRef = database.getReference(Common.CUSTOMER_INFO_REFERENCE);
         if (resultCode != RESULT_CANCELED) {
+
             switch (requestCode) {
                 case 0:
                     if (resultCode == RESULT_OK && data != null) {
@@ -167,7 +174,7 @@ fragment.setEditListener(this);
                         byte[] imagedata = baos.toByteArray();
 
 
-                        StorageReference userImagesRef = storageRef.child("images/"+user.getPhoneNumber()+".jpg");
+                        StorageReference userImagesRef = storageRef.child("user/profile-images/"+user.getPhoneNumber()+".jpg");
                         uploadTask = userImagesRef.putBytes(imagedata);
 
                         // Register observers to listen for when the download is done or if it fails
@@ -175,12 +182,41 @@ fragment.setEditListener(this);
                             @Override
                             public void onFailure(@NonNull Exception exception) {
                                 // Handle unsuccessful uploads
+                                Log.e("uploading photo",exception.toString());
                             }
                         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                             @Override
                             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                                 // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
                                 // ...
+                              //  final Task<Uri> downloadUrl = taskSnapshot.getStorage().getDownloadUrl();
+
+                              //  currentCustomer.setUserImageUrl(userImagesRef.getDownloadUrl());
+
+                                userImagesRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                    @Override
+                                    public void onSuccess(Uri uri) {
+                                        Map<String, Object> hopperUpdates = new HashMap<>();
+                                        hopperUpdates.put("userImageUrl",uri.toString());
+                                        customerInfoRef.child(user.getUid()).updateChildren(hopperUpdates);
+                                        currentCustomer.setUserImageUrl(uri.toString());
+
+
+                                    }
+                                });
+
+                              //  Log.e("download link",downloadUrl.getResult().getPath());
+                              /*  customerInfoRef.child(user.getUid()).setValue(currentCustomer)
+                                        .addOnFailureListener(e -> {
+                                            Log.e("updating error",e.toString());
+                                        }).addOnSuccessListener(aVoid -> {
+                                    Log.e("success uploading","done");
+
+
+
+                                });
+
+                               */
                             }
                         });
                     }
@@ -199,22 +235,41 @@ fragment.setEditListener(this);
                             public void onFailure(@NonNull Exception exception) {
                                 // Handle unsuccessful uploads
                             }
-                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        });
+                        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                             @Override
                             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                                 // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
                                 // ...
-                                currentCustomer.setUserImageUrl(taskSnapshot.getMetadata().getPath());
-                                customerInfoRef.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(currentCustomer)
+                              /*  final Task<Uri> downloadUrl = taskSnapshot.getStorage().getDownloadUrl();
+                                currentCustomer.setUserImageUrl(downloadUrl.getResult().getPath());
+                                customerInfoRef.child(user.getUid()).setValue(currentCustomer)
                                         .addOnFailureListener(e -> {
-
-                                            Toast.makeText(ProfileActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                            Log.e("updating error",e.toString());
                                         }).addOnSuccessListener(aVoid -> {
-                                    Toast.makeText(ProfileActivity.this, "image updated successfully", Toast.LENGTH_SHORT).show();
+                                    Log.e("success uploading","done");
+
 
 
                                 });
-                                taskSnapshot.getMetadata().getPath();
+
+                               */
+
+                                riversRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                    @Override
+                                    public void onSuccess(Uri uri) {
+                                        Map<String, Object> hopperUpdates = new HashMap<>();
+                                        hopperUpdates.put("userImageUrl",uri.toString());
+                                        customerInfoRef.child(user.getUid()).updateChildren(hopperUpdates);
+                                        currentCustomer.setUserImageUrl(uri.toString());
+
+                                    }
+                                });
+
+
+
+
+                            //   currentCustomer.updateCustomerInfo();
                             }
                         });
 
@@ -264,7 +319,30 @@ fragment.setEditListener(this);
 
                         Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
                     }).addOnSuccessListener(aVoid -> {
+                FirebaseAuth mAuth = FirebaseAuth.getInstance();
+                mAuth.signInAnonymously()
+                        .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                if (task.isSuccessful()) {
+                                    Log.d(TAG, "signInAnonymously:success");
+                                    if (mAuth.getCurrentUser().isEmailVerified() == false) {
+                                        mAuth.getCurrentUser().updateEmail(currentCustomer.getEmail());
+                                        mAuth.getCurrentUser().sendEmailVerification();
+                                        Log.e(TAG, "mail sent.....................................");
+                                    }
+
+                                    //updateUI(user);
+                                } else {
+                                    // If sign in fails, display a message to the user.
+                                    Log.w(TAG, "signInAnonymously:failure", task.getException());
+                                    Toast.makeText(getApplicationContext(), "Authentication failed.",
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
                 Toast.makeText(this, "updated successfully", Toast.LENGTH_SHORT).show();
+
 
 
             });

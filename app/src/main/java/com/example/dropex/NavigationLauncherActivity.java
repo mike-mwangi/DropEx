@@ -35,9 +35,12 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.bumptech.glide.Glide;
 import com.example.dropex.ui.home.HomeActivity;
+import com.example.dropex.ui.job.JobsActivity;
 import com.example.dropex.ui.main.SplashScreenActivity;
 import com.example.dropex.ui.profile.ProfileActivity;
+import com.example.dropex.ui.shipments.main.CallToActionActivity;
 import com.example.dropex.utils.AppExecutor;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.navigation.NavigationView;
@@ -205,6 +208,10 @@ localeUtils=new LocaleUtils();
 
                 dialog.show();
             }
+            else if(item.getItemId() == R.id.nav_home){
+                startActivity(new Intent(this, JobsActivity.class));
+
+            }
 
             return true;
         });
@@ -216,6 +223,10 @@ localeUtils=new LocaleUtils();
 
 
         img_avatar = (ImageView)headerView.findViewById(R.id.user_avatar);
+        Glide
+                .with(this)
+                .load(currentCustomer.getUserImageUrl())
+                .into(img_avatar);
 
         text_name.setText(currentCustomer.getFirstName()+" "+currentCustomer.getLastName());
 

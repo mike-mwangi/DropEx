@@ -25,12 +25,18 @@ import com.example.dropex.FetchGeocodingTask;
 import com.example.dropex.FetchGeocodingTaskCallbackInterface;
 import com.example.dropex.FetchSolutionConfig;
 import com.example.dropex.FetchSolutionTask;
+import com.example.dropex.Model.CustomService;
+import com.example.dropex.Model.CustomVehicle;
+import com.example.dropex.Model.ItemSize;
 import com.example.dropex.R;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.gson.Gson;
 import com.graphhopper.directions.api.client.model.Address;
 import com.graphhopper.directions.api.client.model.GeocodingLocation;
+import com.graphhopper.directions.api.client.model.Service;
 import com.graphhopper.directions.api.client.model.Shipment;
 import com.graphhopper.directions.api.client.model.Stop;
 import com.mapbox.api.geocoding.v5.models.CarmenFeature;
@@ -63,12 +69,17 @@ public class ShippingItemFragment extends Fragment implements FetchGeocodingTask
 
     private TextInputEditText deliveryAddress;
     private TextInputEditText itemNote;
-    private MaterialButton button;
+
     private EditText locationInput;
     private ArrayList<GeocodingLocation> locations;
     private GeocodingLocation deliveryLocation;
     private GeocodingLocation pickuplocation;
+    private TextInputEditText customerNameTextInput;
+    private ChipGroup sizeChips;
+    private TextInputEditText customerPhoneNumberInput;
+    public String sizeOfItemString;
 
+//if item number is negative then this means that we are at the final page an trying to finish
     private int itemNumber;
     private AutoCompleteAdapter autoCompleteAdapter1;
 
@@ -97,8 +108,20 @@ public class ShippingItemFragment extends Fragment implements FetchGeocodingTask
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         itemNote=view.findViewById(R.id.item_note_input);
-       // button=view.findViewById(R.id.btn_next_item);
+        sizeChips=view.findViewById(R.id.size_input_chips);
        locationInput=view.findViewById(R.id.location_input);
+       customerNameTextInput=view.findViewById(R.id.name_of_recipient);
+       customerPhoneNumberInput=view.findViewById(R.id.receiver_phone_number_input);
+
+       sizeChips.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View v) {
+               final int checkedChipId = sizeChips.getCheckedChipId();
+               final Chip checkedChip = view.findViewById(checkedChipId);
+               sizeOfItemString=checkedChip.getText().toString();
+           }
+       });
+
 
         locations= new ArrayList<>();
         RecyclerView recyclerView = view.findViewById(R.id.location_recycler_view);
@@ -111,7 +134,17 @@ public class ShippingItemFragment extends Fragment implements FetchGeocodingTask
       autoCompleteAdapter1.setOnItemClickListener(this);
 
         ImageButton searchButton=view.findViewById(R.id.search_btn);
-
+locationInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+    @Override
+    public void onFocusChange(View v, boolean hasFocus) {
+        if(hasFocus){
+            recyclerView.setVisibility(View.VISIBLE);
+        }
+        else{
+            recyclerView.setVisibility(View.INVISIBLE);
+        }
+    }
+});
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -137,37 +170,49 @@ public class ShippingItemFragment extends Fragment implements FetchGeocodingTask
         new FetchSolutionTask(null, getString(R.string.gh_key)).execute(new FetchSolutionConfig(jobId, vehicleId));
     }
 
-    public Shipment getShipment() {
-        Shipment shipment=new Shipment();
+    public CustomService getService() {
+        String customerName=customerNameTextInput.getText().toString();
+        String deliveryNote=itemNote.getText().toString();
+        String customerPhoneNumber=customerPhoneNumberInput.getText().toString();
+        int sizeOfItem= ItemSize.getSizeOfItem(sizeOfItemString);
+
+        CustomService service=new CustomService();
+        service.setCustomerName(customerName);
+        service.setDeliveryNote(deliveryNote);
+        service.setCustomerPhoneNumber(customerPhoneNumber);
+        service.setCustomSize(sizeOfItem);
+
         Stop stop=new Stop();
         Address address=new Address();
-
         address.setLat(deliveryLocation.getPoint().getLat());
         address.setLon(deliveryLocation.getPoint().getLng());
         address.setName(deliveryLocation.getName());
-
         stop.setAddress(address);
+        service.setAddress(address);
 
-    /*    Stop stop1=new Stop();
-        Address address1=new Address();
-
-        address1.setLat(pickuplocation.getPoint().getLat());
-        address1.setLon(pickuplocation.getPoint().getLng());
-        address1.setName(pickuplocation.getName());
-
-        stop1.setAddress(address1);
-
-     */
-
-
-        shipment.setDelivery(stop);
-      //  shipment.setPickup(stop1);
-        shipment.setId("myshipmentid");
-        shipment.setName("pickup and deliver to me");
+        String shimentId=customerName+customerPhoneNumber;
+        service.setId(shimentId);
+        service.setName("pickup and deliver to me");
         long maxT=9222036;
-        shipment.setMaxTimeInVehicle(maxT);
+        service.setMaxTimeInVehicle(maxT);
 
-        return shipment;
+        if(service.getCustomerName()==""){
+            service=null;
+        }
+        else if(service.getCustomerPhoneNumber()=="")
+        {
+            service=null;
+        }
+        else if(service.getDeliveryNote()=="")
+        {
+            service=null;
+        } else if(deliveryLocation==null)
+        {
+            service=null;
+        }
+
+
+        return service;
     }
 
     @Override
@@ -190,5 +235,7 @@ public class ShippingItemFragment extends Fragment implements FetchGeocodingTask
     @Override
     public void onItemClick(GeocodingLocation location) {
         deliveryLocation=location;
+        locationInput.setText(location.getCountry()+","+location.getCity()+","+location.getName());
     }
+
 }

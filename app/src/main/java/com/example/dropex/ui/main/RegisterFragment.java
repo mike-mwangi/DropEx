@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,14 +19,21 @@ import android.widget.Toast;
 
 import com.example.dropex.Common.Common;
 import com.example.dropex.Model.CustomerModel;
+import com.example.dropex.NavigationLauncherActivity;
 import com.example.dropex.R;
 import com.example.dropex.ui.home.HomeActivity;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.Executor;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -127,7 +135,7 @@ public class RegisterFragment extends Fragment {
                 model.setPhoneNumber(edit_phone.getText().toString());
                 model.setEmail(edit_email.getText().toString());
 
-               FirebaseDatabase database = FirebaseDatabase.getInstance("https://dropex-c78c1-default-rtdb.firebaseio.com/");
+                FirebaseDatabase database = FirebaseDatabase.getInstance("https://dropex-c78c1-default-rtdb.firebaseio.com/");
                 customerInfoRef = database.getReference(Common.CUSTOMER_INFO_REFERENCE);
                 customerInfoRef.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(model)
                         .addOnFailureListener(e -> {
@@ -135,6 +143,35 @@ public class RegisterFragment extends Fragment {
                             Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
                         }).addOnSuccessListener(aVoid -> {
                     Toast.makeText(context, "Registered successfully", Toast.LENGTH_SHORT).show();
+
+
+                    final FirebaseAuth mAuth = FirebaseAuth.getInstance();
+                    mAuth.signInAnonymously()
+                            .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    if (task.isSuccessful()) {
+
+                                        Log.d("RegisterFragment", "signInAnonymously:success");
+                                        if (mAuth.getCurrentUser().isEmailVerified() == false) {
+                                            mAuth.getCurrentUser().updateEmail(model.getEmail());
+                                            mAuth.getCurrentUser().sendEmailVerification();
+                                            Log.e("RegisterFragment", "mail sent.....................................");
+                                        }
+
+                                        //updateUI(user);
+                                    } else {
+                                        // If sign in fails, display a message to the user.
+                                        String TAG="RegisterFragment";
+                                        Log.w(TAG, "signInAnonymously:failure", task.getException());
+                                        Toast.makeText(getContext(), "Authentication failed.",
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
+
+
+
                     dialog.dismiss();
                     goToHomeActivity(model);
                 });
@@ -147,7 +184,7 @@ public class RegisterFragment extends Fragment {
 
     private void goToHomeActivity(CustomerModel customerModel) {
         Common.currentCustomer = customerModel;
-        startActivity(new Intent(context, HomeActivity.class));
+        startActivity(new Intent(context, NavigationLauncherActivity.class));
 
     }
 }

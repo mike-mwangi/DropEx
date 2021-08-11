@@ -137,5 +137,6 @@ public class JobInformationFragment extends Fragment implements FetchGeocodingTa
     @Override
     public void onItemClick(GeocodingLocation location) {
         pickupLocation=location;
+        locationInput.setText(location.getCountry()+","+location.getCity()+","+location.getName());
     }
 }

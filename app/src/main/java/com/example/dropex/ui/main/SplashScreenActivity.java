@@ -192,7 +192,7 @@ public class SplashScreenActivity extends AppCompatActivity {
 
     private void goToHomeActivity(CustomerModel customerModel) {
         Common.currentCustomer = customerModel;
-        startActivity(new Intent(SplashScreenActivity.this, CallToActionActivity.class));
+        startActivity(new Intent(SplashScreenActivity.this, NavigationLauncherActivity.class));
         overridePendingTransition(R.anim.fade_in,R.anim.fade_out);
         finish();
     }

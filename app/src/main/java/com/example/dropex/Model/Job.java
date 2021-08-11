@@ -7,7 +7,14 @@ import android.util.Log;
 
 import com.example.dropex.NavigationLauncherActivity;
 import com.example.dropex.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ServerTimestamp;
+import com.google.gson.JsonObject;
 import com.graphhopper.directions.api.client.JSON;
+import com.graphhopper.directions.api.client.model.Address;
 import com.graphhopper.directions.api.client.model.GeocodingLocation;
 import com.graphhopper.directions.api.client.model.Service;
 import com.graphhopper.directions.api.client.model.Shipment;
@@ -20,8 +27,10 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Random;
 
+import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -31,12 +40,27 @@ import okhttp3.RequestBody;
 import static com.example.dropex.Common.Common.currentCustomer;
 
 public class Job {
-    private String jobID;
-    private ArrayList<Vehicle> vehicles;
-    private ArrayList<Shipment> shipments;
-    private ArrayList<Service> services=new ArrayList<>();
-    private GeocodingLocation pickUpLocation;
 
+    private String jobID;
+    private ArrayList<CustomVehicle> vehicles;
+    private ArrayList<CustomVehicleType> vehicleTypes;
+    private ArrayList<CustomService> services=new ArrayList<>();
+    private GeocodingLocation pickUpLocation;
+    private boolean hasBeenFulfilled=false;
+    private int cost;
+    public JobSolution solution;
+
+    @ServerTimestamp
+    Date time;
+
+
+    public JobSolution getSolution() {
+        return solution;
+    }
+
+    public void setSolution(JobSolution solution) {
+        this.solution = solution;
+    }
 
     public GeocodingLocation getPickUpLocation() {
         return pickUpLocation;
@@ -46,13 +70,31 @@ public class Job {
         this.pickUpLocation = pickUpLocation;
     }
 
-    public Job(ArrayList<Vehicle> vehicles, ArrayList<Shipment> shipments) {
+    public Job(ArrayList<CustomVehicle> vehicles, ArrayList<CustomService> services) {
         this.vehicles = vehicles;
-        this.shipments = shipments;
+     this.services=services;
     }
 
     public Job() {
+    }
 
+    public Job(String jobID, ArrayList<CustomVehicle> vehicles, ArrayList<CustomVehicleType> vehicleTypes, ArrayList<CustomService> services, GeocodingLocation pickUpLocation, boolean hasBeenFulfilled, int cost, Date time) {
+        this.jobID = jobID;
+        this.vehicles = vehicles;
+        this.vehicleTypes = vehicleTypes;
+        this.services = services;
+        this.pickUpLocation = pickUpLocation;
+        this.hasBeenFulfilled = hasBeenFulfilled;
+        this.cost = cost;
+        this.time = time;
+    }
+
+    public boolean isHasBeenFulfilled() {
+        return hasBeenFulfilled;
+    }
+
+    public void setHasBeenFulfilled(boolean hasBeenFulfilled) {
+        this.hasBeenFulfilled = hasBeenFulfilled;
     }
 
     public String getJobID() {
@@ -63,23 +105,23 @@ public class Job {
         this.jobID = jobID;
     }
 
-    public ArrayList<Vehicle> getVehicles() {
+    public ArrayList<CustomVehicle> getVehicles() {
         return vehicles;
     }
 
-    public void setVehicles(ArrayList<Vehicle> vehicles) {
+    public void setVehicles(ArrayList<CustomVehicle> vehicles) {
         this.vehicles = vehicles;
     }
 
-    public ArrayList<Shipment> getShipments() {
-        return shipments;
+    public ArrayList<CustomService> getServices() {
+        return services;
     }
 
-    public void setShipments(ArrayList<Shipment> shipments) {
-        this.shipments = shipments;
+    public void setServices(ArrayList<CustomService> services) {
+        this.services = services;
     }
 
-    public String postToGraphhopper(String s, Activity activity) {
+    public Call postToGraphhopper(String s, Activity activity) {
         OkHttpClient client = new OkHttpClient();
         MediaType mediaType = MediaType.parse("application/json");
 
@@ -91,83 +133,50 @@ public class Job {
                 .build();
         Log.e("JOB ", s);
 
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(okhttp3.Call call, IOException e) {
+        final Call call = client.newCall(request);
 
-            }
-
-            @Override
-            public void onResponse(okhttp3.Call call, okhttp3.Response response) throws IOException {
-                String jsonData = response.body().string();
-                JSONObject Jobject = null;
-                try {
-                    Jobject = new JSONObject(jsonData);
-                    jobID= (String) Jobject.get("job_id");
-                    Log.e("JOB ID",jobID);
-                    currentCustomer.getCurrentJob().setJobID(jobID);
-                    Intent goToNavLauncher=new Intent(activity, NavigationLauncherActivity.class);
-                    String uriString="https://graphhopper.com/api/1/vrp/solution/"+currentCustomer.getCurrentJob().getJobID()+"?vehicle_id="+"default"+"&key="+activity.getString(R.string.gh_key);
-                    Uri uri=Uri.parse("https://graphhopper.com/api/1/vrp/solution/"+currentCustomer.getCurrentJob().getJobID()+"?vehicle_id="+"default"+"&key="+activity.getString(R.string.gh_key));
-                    goToNavLauncher.setData(uri);
-                    Log.e("URI", String.valueOf(uri));
-                    Log.e("URI string", uriString);
-
-                    activity.startActivity(goToNavLauncher);
-
-
-
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        });
-
-        return jobID;
+        return call;
     }
 
     public String buildJsonRequest(){
         JSONObject jobObject=new JSONObject();
-        JSONObject vehicles=new JSONObject();
-        JSONObject shipments=new JSONObject();
+        JSONObject vehicleJsonObject=new JSONObject();
+        JSONObject serviceJsonObject=new JSONObject();
         JSONObject location=new JSONObject();
         JSONObject deliveyAddress=new JSONObject();
         JSONArray vehiclesArray=new JSONArray();
-        JSONArray shipmentArray=new JSONArray();
+        JSONArray servicesJsonArray=new JSONArray();
 
-        final ArrayList<Shipment> shipments1 = getShipments();
+        services = getServices();
         try {
-            vehicles.put("vehicle_id","default");
-            //final Stop delivery = shipments1.get(0).getDelivery();
-            location.put("location_id",pickUpLocation.getOsmId());
-            location.put("lon",pickUpLocation.getPoint().getLng());
-            location.put("lat",pickUpLocation.getPoint().getLat());
+            for(CustomVehicle vehicle:vehicles) {
+                vehicleJsonObject.put("vehicle_id", vehicle.getVehicleId());
+                location.put("location_id", pickUpLocation.getOsmId());
+                location.put("lon", pickUpLocation.getPoint().getLng());
+                location.put("lat", pickUpLocation.getPoint().getLat());
 
-            vehicles.put("start_address",location);
-            vehiclesArray.put(vehicles);
+                vehicleJsonObject.put("start_address", location);
+                vehiclesArray.put(vehicleJsonObject);
+            }
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
         int i=0;
 
-        for (Shipment shipment: shipments1) {
-shipments=new JSONObject();
+        for (Service service: services) {
+            serviceJsonObject=new JSONObject();
             try {
-                shipments.put("id",shipment.getId()+String.valueOf(i));
-             //   deliveyAddress.put("address",location);
-              //  shipments.put("pickup",deliveyAddress);
-                final Stop delivery = shipment.getDelivery();
+                serviceJsonObject.put("id",service.getId()+String.valueOf(i));
+                final Address delivery = service.getAddress();
+                location=new JSONObject();
                 location.put("location_id",String.valueOf(i)+"randomness");
-                location.put("lon",delivery.getAddress().getLon());
-                location.put("lat",delivery.getAddress().getLat());
+                location.put("lon",delivery.getLon());
+                location.put("lat",delivery.getLat());
                 deliveyAddress.put("address",location);
-               // deliveyAddress.put("preparation_time",100000);
-                shipments.put("address",location);
-               // shipments.put("max_time_in_vehicle",1000);
-                shipmentArray.put(shipments);
+                serviceJsonObject.put("address",location);
+                servicesJsonArray.put(serviceJsonObject);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -177,14 +186,15 @@ shipments=new JSONObject();
 
         try {
             jobObject.put("vehicles",vehiclesArray);
-            jobObject.put("services",shipmentArray);
+            jobObject.put("services",servicesJsonArray);
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
        String jsonString=jobObject.toString();
 
 
-Log.e("services",shipmentArray.toString());
+        Log.e("services",servicesJsonArray.toString());
 
         return jsonString;
     }
