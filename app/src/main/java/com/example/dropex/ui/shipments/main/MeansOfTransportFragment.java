@@ -76,6 +76,7 @@ public class MeansOfTransportFragment extends Fragment implements View.OnClickLi
         final int cost = MeansOfTransportFragmentArgs.fromBundle(getArguments()).getCost();
         carText=view.findViewById(R.id.explain_why_cars);
         carText.setText(cost);
+
     }
 
     @Override

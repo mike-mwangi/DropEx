@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,6 +29,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -36,6 +39,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.bumptech.glide.Glide;
+import com.example.dropex.Model.JobSolution;
 import com.example.dropex.ui.home.HomeActivity;
 import com.example.dropex.ui.job.JobsActivity;
 import com.example.dropex.ui.main.SplashScreenActivity;
@@ -43,6 +47,7 @@ import com.example.dropex.ui.profile.ProfileActivity;
 import com.example.dropex.ui.shipments.main.CallToActionActivity;
 import com.example.dropex.utils.AppExecutor;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -101,7 +106,7 @@ import static com.example.dropex.Common.Common.currentCustomer;
 
 public class NavigationLauncherActivity extends AppCompatActivity implements OnMapReadyCallback,
         MapboxMap.OnMapLongClickListener, OnRouteSelectionChangeListener,
-        SolutionInputDialog.NoticeDialogListener, FetchSolutionTaskCallbackInterface,
+        SolutionInputDialog.NoticeDialogListener, FetchSolutionCallBackInterfaceButWithJobSolution,
         FetchGeocodingTaskCallbackInterface, GeocodingInputDialog.NoticeDialogListener,
         PermissionsListener {
 
@@ -142,6 +147,13 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     private String currentJobId = "";
     private String currentVehicleId = "";
     private String currentGeocodingInput = "";
+    private TextView bikePriceTextView;
+    private TextView truckPriceTextView;
+    private TextView carPriceTextView;
+
+    private TextView capacityBikeTextView;
+    private TextView capacityTruckTextView;
+    private TextView capacityCarTextView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -150,12 +162,23 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         Mapbox.getInstance(this.getApplicationContext(), getString(R.string.mapbox_access_token));
         Telemetry.disableOnUserRequest();
        // ButterKnife.bind(this);
+
+        ConstraintLayout bottomSheet = findViewById(R.id.bottom_sheet_behavior_id);
+        bikePriceTextView = bottomSheet.findViewById(R.id.number_of_bikes);
+        carPriceTextView = bottomSheet.findViewById(R.id.number_of_cars);
+        truckPriceTextView = bottomSheet.findViewById(R.id.number_of_trucks);
+
+
+        BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
         mapView=findViewById(R.id.mapView);
         loading=findViewById(R.id.loading);
         mapView.setStyleUrl(Style.TRAFFIC_DAY);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
-localeUtils=new LocaleUtils();
+        localeUtils=new LocaleUtils();
 
         drawer = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
@@ -183,6 +206,15 @@ localeUtils=new LocaleUtils();
 
         init();
         showFirstStartIfNecessary();
+    }
+    private void setVehiclePrices(Integer cost){
+        int bikePrice=cost*2;
+        bikePriceTextView.setText(String.valueOf(bikePrice)+" Kshs");
+        carPriceTextView.setText(String.valueOf(cost*2.7)+" Kshs");
+        truckPriceTextView.setText(String.valueOf(cost*3)+" Kshs");
+        capacityBikeTextView.setText("capacity < 5kg");
+        capacityCarTextView.setText("capacity < 200kg");
+        capacityTruckTextView.setText("capacity < 1000kg");
     }
 
     private void init() {
@@ -245,48 +277,6 @@ localeUtils=new LocaleUtils();
     public void showProfileAFragment(View view) {
        startActivity(new Intent(NavigationLauncherActivity.this, ProfileActivity.class));
        overridePendingTransition(R.anim.fade_in,R.anim.fade_out);
-   /*     OkHttpClient client = new OkHttpClient();
-        MediaType mediaType = MediaType.parse("application/json");
-
-        RequestBody body = RequestBody.create(mediaType, "{\n  \"vehicles\": [\n    {\n      \"vehicle_id\": \"my_vehicle\",\n      \"start_address\": {\n        \"location_id\": \"berlin\",\n        \"lon\": 13.406,\n        \"lat\": 52.537\n      }\n    }\n  ],\n  \"services\": [\n    {\n      \"id\": \"hamburg\",\n      \"name\": \"visit_hamburg\",\n      \"address\": {\n        \"location_id\": \"hamburg\",\n        \"lon\": 9.999,\n        \"lat\": 53.552\n      }\n    },\n    { \n     \"id\": \"munich\",\n      \"name\": \"visit_munich\",\n      \"address\": {\n        \"location_id\": \"munich\",\n        \"lon\": 11.57,\n        \"lat\": 48.145\n      }\n    }\n  ]}");
-        Request request = new Request.Builder()
-                .url("https://graphhopper.com/api/1/vrp/optimize?key=c9a37a2f-6bfd-4c87-9bf9-b482e64dfbee")
-                .post(body)
-                .addHeader("content-type", "application/json")
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(okhttp3.Call call, IOException e) {
-
-            }
-
-            @Override
-            public void onResponse(okhttp3.Call call, okhttp3.Response response) throws IOException {
-                String jsonData = response.body().string();
-                JSONObject Jobject = null;
-                try {
-                    Jobject = new JSONObject(jsonData);
-                    currentJobId= (String) Jobject.get("job_id");
-                    Log.e("jobid",currentJobId);
-
-                    fetchVrpSolution("de14ac60-854c-4088-abf3-868a1b0a642d","my_vehicle");
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-            }
-
-
-
-                // you code to handle response
-            }
-);
-
-    */
-     //   fetchVrpSolution("de14ac60-854c-4088-abf3-868a1b0a642d","my_vehicle");
-
 
     }
 
@@ -877,7 +867,7 @@ localeUtils=new LocaleUtils();
         currentVehicleId = vehicleId;
 
         //   showLoading();
-        new FetchSolutionTask(this, getString(R.string.gh_key)).execute(new FetchSolutionConfig(currentJobId, currentVehicleId));
+        new FetchSolutionTaskButReturnJobSolution(this, getString(R.string.gh_key)).execute(new FetchSolutionConfig(currentJobId, currentVehicleId));
     }
 
     @Override
@@ -972,12 +962,14 @@ localeUtils=new LocaleUtils();
     }
 
     @Override
-    public void onPostExecute(List<Point> points) {
+    public void onPostExecute(JobSolution jobSolution) {
+        List<Point> points=jobSolution.getPoints();
         if (getStartFromLocationFromSharedPreferences() && !points.isEmpty()) {
             // Remove the first point if we want to start from the current location
 
         }
 
+        setVehiclePrices(jobSolution.getCosts());
         updateWaypoints(points);
     }
 

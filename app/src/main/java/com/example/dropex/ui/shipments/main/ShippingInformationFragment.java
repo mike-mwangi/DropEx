@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 import androidx.viewpager2.widget.ViewPager2;
@@ -18,15 +19,20 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.example.dropex.FetchSolutionCallBackInterfaceButWithJobSolution;
+import com.example.dropex.FetchSolutionConfig;
 import com.example.dropex.FetchSolutionTaskButReturnJobSolution;
 import com.example.dropex.FetchSolutionTaskCallbackInterface;
 import com.example.dropex.Model.CustomService;
+import com.example.dropex.Model.CustomVehicle;
 import com.example.dropex.Model.Job;
 import com.example.dropex.Model.JobSolution;
 import com.example.dropex.NavigationLauncherActivity;
 import com.example.dropex.R;
 
 import com.example.dropex.ui.main.OnboardingFragment;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -59,7 +65,7 @@ import static com.example.dropex.Common.Common.currentCustomer;
  */
 public class ShippingInformationFragment extends Fragment implements View.OnClickListener , FetchSolutionCallBackInterfaceButWithJobSolution {
 
-
+public String TAG=this.getTag();
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
@@ -67,6 +73,7 @@ public class ShippingInformationFragment extends Fragment implements View.OnClic
     private static ArrayList<ShippingItemFragment> fragments = new ArrayList<ShippingItemFragment>();
     private ViewPager2 viewPager;
     private OnBoardingViewPagerAdapter adapter;
+    NavController navController;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -99,6 +106,8 @@ public class ShippingInformationFragment extends Fragment implements View.OnClic
     @Override
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+    navController = Navigation.findNavController(view);
+
 
         final int numberOfShipments = ShippingInformationFragmentArgs.fromBundle(getArguments()).getNumberOfShipments();
         viewPager=(ViewPager2) view.findViewById(R.id.viewpager);
@@ -170,6 +179,7 @@ public class ShippingInformationFragment extends Fragment implements View.OnClic
                 }
 
                     currentCustomer.getCurrentJob().setServices(services);
+
                     Gson gson = new Gson();
                     final String s = currentCustomer.getCurrentJob().buildJsonRequest();
                     //to go back to previous version just remove the .enque from here to job posttoGraphopper
@@ -194,20 +204,21 @@ public class ShippingInformationFragment extends Fragment implements View.OnClic
                                 currentCustomer.getCurrentJob().setJobID(jobID);
                                 currentCustomer.getCurrentJob().setSolution(jobSolution);
                                 FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid()).collection("jobs").document(currentCustomer.getCurrentJob().getJobID()).set(currentCustomer.getCurrentJob());
-                                new FetchSolutionTaskButReturnJobSolution(ShippingInformationFragment.this,getString(R.string.gh_key)).execute();
-                                /*
+                                Job job=currentCustomer.getCurrentJob();
+                               // new FetchSolutionTaskButReturnJobSolution(ShippingInformationFragment.this,getString(R.string.gh_key)).execute(new FetchSolutionConfig(job.getJobID(), "default"));
 
-                                Intent goToNavLauncher=new Intent(activity, NavigationLauncherActivity.class);
+
+                                Intent goToNavLauncher=new Intent(ShippingInformationFragment.this.getActivity(), NavigationLauncherActivity.class);
                                 String uriString="https://graphhopper.com/api/1/vrp/solution/"+currentCustomer.getCurrentJob().getJobID()+"?vehicle_id="+"default"+"&key="+getString(R.string.gh_key);
-                                Uri uri=Uri.parse("https://graphhopper.com/api/1/vrp/solution/"+currentCustomer.getCurrentJob().getJobID()+"?vehicle_id="+"default"+"&key="+activity.getString(R.string.gh_key));
+                                Uri uri=Uri.parse("https://graphhopper.com/api/1/vrp/solution/"+currentCustomer.getCurrentJob().getJobID()+"?vehicle_id="+"default"+"&key="+getString(R.string.gh_key));
                                 goToNavLauncher.setData(uri);
                                 FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid()).collection("jobs").document(currentCustomer.getCurrentJob().getJobID()).set(currentCustomer.getCurrentJob());
                                 Log.e("URI", String.valueOf(uri));
                                 Log.e("URI string", uriString);
 
-                                activity.startActivity(goToNavLauncher);
+                                startActivity(goToNavLauncher);
 
-                                 */
+
 
 
 
@@ -217,7 +228,7 @@ public class ShippingInformationFragment extends Fragment implements View.OnClic
                             }
 
                         }
-                    });;
+                    });
                     currentCustomer.getJobs().add(currentCustomer.getCurrentJob());
 
 
@@ -237,12 +248,25 @@ public class ShippingInformationFragment extends Fragment implements View.OnClic
     @Override
     public void onPostExecute(JobSolution jobSolution) {
         Map<String,Object> solution=new HashMap<>();
-        solution.put("jobSolution",jobSolution);
-        FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid()).collection("jobs").document(currentCustomer.getCurrentJob().getJobID()).update(solution);
-        ShippingInformationFragmentDirections.ActionShippingInformationToMeansOfTransport action=ShippingInformationFragmentDirections.actionShippingInformationToMeansOfTransport();
+        solution.put("solution",jobSolution);
+        final Task<Void> update = FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid()).collection("jobs").document(currentCustomer.getCurrentJob().getJobID()).update(solution);
+        update.addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void unused) {
+
+            }
+        });
+        update.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull @NotNull Exception e) {
+                Log.e(TAG,e.toString());
+            }
+        });
+        ShippingInformationFragmentDirections.ActionShippingInformationToMeansOfTransport toMeansOfTransport=
+                    ShippingInformationFragmentDirections.actionShippingInformationToMeansOfTransport();
         int costs= jobSolution.getCosts();
-        action.setCost(costs);
-        Navigation.findNavController(ShippingInformationFragment.this.getView()).navigate(action);
+        toMeansOfTransport.setCost(((Integer)costs));
+       navController.navigate(toMeansOfTransport);
 
 
     }

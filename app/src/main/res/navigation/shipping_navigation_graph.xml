@@ -49,6 +49,7 @@
                 android:defaultValue="1" />
         </action>
     </fragment>
+
     <fragment
         android:id="@+id/MeansOfTransport"
         android:name="com.example.dropex.ui.shipments.main.MeansOfTransportFragment"

@@ -42,7 +42,7 @@ import static com.example.dropex.Common.Common.currentCustomer;
 public class Job {
 
     private String jobID;
-    private ArrayList<CustomVehicle> vehicles;
+    private ArrayList<CustomVehicle> vehicles=new ArrayList<>();
     private ArrayList<CustomVehicleType> vehicleTypes;
     private ArrayList<CustomService> services=new ArrayList<>();
     private GeocodingLocation pickUpLocation;
@@ -139,6 +139,7 @@ public class Job {
     }
 
     public String buildJsonRequest(){
+
         JSONObject jobObject=new JSONObject();
         JSONObject vehicleJsonObject=new JSONObject();
         JSONObject serviceJsonObject=new JSONObject();
@@ -148,16 +149,19 @@ public class Job {
         JSONArray servicesJsonArray=new JSONArray();
 
         services = getServices();
+
         try {
-            for(CustomVehicle vehicle:vehicles) {
-                vehicleJsonObject.put("vehicle_id", vehicle.getVehicleId());
+
+
+
+                vehicleJsonObject.put("vehicle_id", "default");
                 location.put("location_id", pickUpLocation.getOsmId());
                 location.put("lon", pickUpLocation.getPoint().getLng());
                 location.put("lat", pickUpLocation.getPoint().getLat());
 
                 vehicleJsonObject.put("start_address", location);
                 vehiclesArray.put(vehicleJsonObject);
-            }
+
 
         } catch (JSONException e) {
             e.printStackTrace();
