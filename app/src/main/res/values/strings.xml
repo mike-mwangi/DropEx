@@ -137,16 +137,19 @@
     <string name="label_cta" />
     <string name="job_information" />
     <string name="shipping_information" />
-    <string name="number_of_packages">amounr</string>
+    <string name="number_of_packages">number of packages</string>
     <string name="next">Next</string>
     <string name="pickup_location">Pickup Location</string>
     <string name="delivery_address">delivery address</string>
     <string name="note">Delivery Note</string>
     <string name="recipient_phone_number">0712345678</string>
-    <string name="delivery_info">Who\'s receiving teh package?</string>
+    <string name="delivery_info">Who is receiving the package?</string>
     <string name="name">Name</string>
     <string name="choice_small">Small</string>
     <string name="choice_medium">Medium</string>
     <string name="choice_large">Large</string>
+    <string name="menu_jobs">Jobs</string>
+    <string name="pickup_address">Pickup address</string>
+    <string name="mot_information">Means Of Transport</string>
 
 </resources>

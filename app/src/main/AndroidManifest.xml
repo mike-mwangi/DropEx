@@ -16,6 +16,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApp">
+        <activity android:name=".ui.job.JobsActivity"></activity>
         <activity android:name=".ui.profile.ProfileActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -28,7 +29,8 @@
         <!--
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" /> <activity -->
+            android:value="@string/google_maps_key" /> <activity
+        -->
         <!-- android:name=".VerifyOTPActivity" -->
         <!-- android:screenOrientation="portrait" -->
         <!-- android:windowSoftInputMode="adjustResize" /> -->
@@ -46,23 +48,16 @@
             android:theme="@style/Theme.MyApp.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
         <activity
             android:name=".ui.main.OnboardingActivity"
             android:theme="@style/Theme.MyApp.NoActionBar" />
-        <activity
-            android:name=".ui.shipments.main.CallToActionActivity"
-            />
-        <activity android:name=".ui.home.HomeActivity" >
-
-        </activity>
-        <activity
-            android:name=".NavigationLauncherActivity">
-        </activity>
-
+        <activity android:name=".ui.shipments.main.CallToActionActivity" />
+        <activity android:name=".ui.home.HomeActivity"></activity>
+        <activity android:name=".NavigationLauncherActivity"></activity>
     </application>
 
 </manifest>

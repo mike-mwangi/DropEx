@@ -8,7 +8,7 @@
         <item
             android:id="@+id/nav_home"
             android:icon="@drawable/ic_home"
-            android:title="@string/menu_home" />
+            android:title="@string/menu_jobs" />
         <item
             android:id="@+id/nav_sign_out"
             android:icon="@drawable/ic_exit"
