@@ -1,12 +1,19 @@
 package com.example.dropex.Common;
 
+import androidx.annotation.NonNull;
+
 import com.example.dropex.Model.CustomerModel;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+
+import org.jetbrains.annotations.NotNull;
 
 public class Common {
     public static final String CUSTOMER_INFO_REFERENCE = "Customers";
@@ -32,4 +39,25 @@ public class Common {
             return "";
 
     }
+    public static CustomerModel getCurrentCustomer(){
+        customerDataBaseReference.child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            currentCustomer = dataSnapshot.getValue(CustomerModel.class);
+
+
+                        }
+
+                    }
+                    @Override
+                    public void onCancelled(@NonNull @NotNull DatabaseError error) {
+
+                    }
+                });
+
+
+           return currentCustomer;
+                }
 }

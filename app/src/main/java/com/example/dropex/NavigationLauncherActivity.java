@@ -39,6 +39,8 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.bumptech.glide.Glide;
+import com.example.dropex.Common.Common;
+import com.example.dropex.Model.CustomerModel;
 import com.example.dropex.Model.JobSolution;
 import com.example.dropex.ui.home.HomeActivity;
 import com.example.dropex.ui.job.JobsActivity;
@@ -167,6 +169,9 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         bikePriceTextView = bottomSheet.findViewById(R.id.number_of_bikes);
         carPriceTextView = bottomSheet.findViewById(R.id.number_of_cars);
         truckPriceTextView = bottomSheet.findViewById(R.id.number_of_trucks);
+        capacityBikeTextView=bottomSheet.findViewById(R.id.explain_why_bikes);
+        capacityCarTextView=bottomSheet.findViewById(R.id.explain_why_cars);
+        capacityTruckTextView=bottomSheet.findViewById(R.id.explain_why_trucks);
 
 
         BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
@@ -252,15 +257,16 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         View headerView = navigationView.getHeaderView(0);
         TextView text_name = (TextView)headerView.findViewById(R.id.text_name);
 
-
+        CustomerModel customerModel=Common.getCurrentCustomer();
 
         img_avatar = (ImageView)headerView.findViewById(R.id.user_avatar);
         Glide
                 .with(this)
-                .load(currentCustomer.getUserImageUrl())
+                .load(customerModel .getUserImageUrl())
                 .into(img_avatar);
 
-        text_name.setText(currentCustomer.getFirstName()+" "+currentCustomer.getLastName());
+
+        text_name.setText(customerModel.getFirstName()+" "+customerModel.getLastName());
 
 
     }
