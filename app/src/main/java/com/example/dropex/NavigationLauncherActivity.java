@@ -905,6 +905,8 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         Snackbar.make(mapView, message, Snackbar.LENGTH_LONG).show();
     }
 
+
+
     @Override
     public void onPostExecuteGeocodingSearch(List<GeocodingLocation> locations) {
         clearGeocodingResults();

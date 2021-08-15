@@ -10,6 +10,7 @@ import com.graphhopper.directions.api.client.model.Address;
 import com.graphhopper.directions.api.client.model.Route;
 import com.mapbox.geojson.Point;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,7 +67,7 @@ public class FetchSolutionTask extends AsyncTask<FetchSolutionConfig, Void, List
     }
 
     @Override
-    protected void onPostExecute(List<Point> points) {
+    protected void onPostExecute(List<com.mapbox.geojson.Point> points) {
         callbackInterface.onPostExecute(points);
     }
 }

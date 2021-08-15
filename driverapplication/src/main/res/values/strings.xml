@@ -1,3 +1,12 @@
 <resources>
-    <string name="app_name">Driver Application</string>
+    <string name="app_name">DropEx Driver</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="email">Email</string>
+    <string name="continue_text">Continue</string>
+    <string name="city">City</string>
+    <string name="password">Password</string>
+    <string name="forgot_password">Forgot Password ?</string>
+    <string name="create_your_account">Create Your Account</string>
 </resources>
