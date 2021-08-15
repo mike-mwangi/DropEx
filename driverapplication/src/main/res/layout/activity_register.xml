@@ -74,7 +74,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="number"
-            android:text="+254"
+            android:text="@string/country_code_254"
             android:hint="@string/phone_number" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -143,7 +143,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="24dp"
-        android:text="Already have an account?"
+        android:text="@string/already_have_an_account_textView"
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="@+id/layout_password"

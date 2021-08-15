@@ -17,14 +17,16 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private TextView register;
+    private TextView register, forgotPassword;
     private EditText editTextEmail, editTextPassword;
     private Button loginBtn;
 
     private FirebaseAuth mAuth;
+
     private ProgressBar progressBar;
 
     @Override
@@ -39,11 +41,16 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         loginBtn = (Button) findViewById(R.id.btn_login);
         loginBtn.setOnClickListener(this);
 
+        mAuth = FirebaseAuth.getInstance();
+
         editTextEmail = (EditText) findViewById(R.id.edit_email);
         editTextPassword = (EditText) findViewById(R.id.edit_password);
 
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        mAuth = FirebaseAuth.getInstance();
+
+        forgotPassword = (TextView) findViewById(R.id.forgotPassword);
+        forgotPassword.setOnClickListener(this);
+
 
 
     }
@@ -58,7 +65,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             case R.id.btn_login:
                 driverLogin();
                 break;
-
+            case R.id.forgotPassword:
+                startActivity(new Intent(this, ForgotPasswordActivity.class));
+                finish();
+                break;
         }
     }
 
@@ -96,12 +106,22 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    //To driver home screen
-                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+                    if (user.isEmailVerified()){
+                        //To driver home screen
+                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                        finish();
+                    } else {
+                        user.sendEmailVerification();
+                        Toast.makeText(LoginActivity.this, "Check your email to verify your account!", Toast.LENGTH_LONG).show();
+                    }
+
 
                 } else {
                     Toast.makeText(LoginActivity.this, "Login failed! Please check your credentials", Toast.LENGTH_LONG).show();
                 }
+
                 progressBar.setVisibility(View.GONE);
 
             }
