@@ -10,4 +10,13 @@
     <string name="forgot_password">Forgot Password ?</string>
     <string name="create_your_account">Create Your Account</string>
     <string name="login">Login</string>
+    <string name="forgot_password_textView">Forgot Password</string>
+    <string name="reset_password_text">Reset Password</string>
+    <string name="email_textView">Email</string>
+    <string name="log_out">Log Out</string>
+    <string name="back_to_login_textView">Back to login</string>
+    <string name="country_code_254">+254</string>
+    <string name="already_have_an_account_textView">Already have an account?</string>
+    <string name="sign_in_textView">Sign In</string>
+    <string name="register_account_textView">Register Account</string>
 </resources>

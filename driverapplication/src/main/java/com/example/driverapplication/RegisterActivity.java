@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
@@ -63,6 +64,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                 break;
             case R.id.btn_register:
                 registerUser();
+//                startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
                 break;
         }
 
@@ -148,7 +150,18 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                     }
 
                 });
+                Handler hd = new Handler();
+                hd.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
 
+                        startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
 
+                    }
+
+                }, 3000); // Time Delay ,2 Seconds
     }
+
+
+
 }
