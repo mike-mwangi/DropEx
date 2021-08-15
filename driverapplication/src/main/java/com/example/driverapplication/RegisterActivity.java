@@ -59,6 +59,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         switch (v.getId()) {
             case R.id.login_textView:
                 startActivity(new Intent(this, LoginActivity.class));
+                finish();
                 break;
             case R.id.btn_register:
                 registerUser();
@@ -144,8 +145,8 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                             Toast.makeText(RegisterActivity.this, "Registration failed!", Toast.LENGTH_LONG).show();
                             progressBar.setVisibility(View.GONE);
                         }
-
                     }
+
                 });
 
 
