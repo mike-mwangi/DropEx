@@ -41,5 +41,10 @@
 
         <!--System/Platform attributes-->
         <item name="android:windowLightStatusBar" tools:ignore="NewApi">false</item>
+        <item name="android:windowActivityTransitions">true</item>
+
+        <!-- specify enter and exit transitions -->
+        <item name="android:windowEnterTransition">@transition/explode</item>
+        <item name="android:windowExitTransition">@transition/explode</item>
     </style>
 </resources>
