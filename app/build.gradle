@@ -91,40 +91,5 @@ dependencies {
     //gson
     implementation 'com.google.code.gson:gson:2.8.6'
 
- /*  implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.6.2'
-    implementation 'com.mapbox.mapboxsdk:mapbox-sdk-turf:5.9.0-alpha.1'
-    implementation 'com.mapbox.mapboxsdk:mapbox-sdk-services:5.9.0-alpha.1'
-    implementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:0.11.0'
-    implementation "com.mapbox.navigation:ui:1.5.1"
-    implementation ('com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.34.0') {
-        exclude group: 'com.mapbox.mapboxsdk', module:'mapbox-android-plugin-annotation-v7'
-    }
-
-  */
-    // Mapbox plugins
-    /*
-    implementation dependenciesList.mapboxPluginBuilding
-    implementation dependenciesList.mapboxPluginPlaces
-    implementation dependenciesList.mapboxPluginLocalization
-    implementation dependenciesList.mapboxPluginTraffic
-    implementation dependenciesList.mapboxPluginMarkerView
-    implementation dependenciesList.mapboxPluginAnnotation
-    implementation dependenciesList.mapboxPluginScalebar
-
-     */
-
-/*
-    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.1.0'
-    //Circular images
-    implementation 'de.hdodenhof:circleimageview:3.1.0'
-
-   //graphhopper dependencies
-    implementation 'com.graphhopper:directions-api-client:0.10.1-4'
-    implementation 'com.jakewharton:butterknife:10.2.3'
-
- */
-
-
-
 
 }
