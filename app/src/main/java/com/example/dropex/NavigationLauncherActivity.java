@@ -860,6 +860,8 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     }
     /*
 
+
+
     @Override
     public void onPostExecuteGeocodingSearch(List<GeocodingLocation> locations) {
         clearGeocodingResults();

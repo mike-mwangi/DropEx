@@ -209,13 +209,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     }
 
     @Override
-    public void onPostExecute(List<Point> points) {
-        if (getStartFromLocationFromSharedPreferences() && !points.isEmpty()) {
-            // Remove the first point if we want to start from the current location
-            points.remove(0);
-        }
-        updateWaypoints(points);
+    public void onPostExecute(List<com.mapbox.geojson.Point> points) {
+
     }
+
+
+
 
 
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.driverapplication">
+    package="com.example.driverapplication"
+    android:theme="@style/Theme.DropEx">
 
     <application
         android:allowBackup="true"
@@ -12,8 +13,11 @@
         <activity android:name=".ForgotPasswordActivity"></activity>
         <activity android:name=".WelcomeActivity" />
         <activity android:name=".RegisterActivity" />
-        <activity android:name=".LoginActivity" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity" />
+
+        <activity
+            android:name=".LoginActivity"
+            android:theme="@style/Theme.DropEx">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
