@@ -59,6 +59,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
+        app:navigationViewMapStyle="mapbox://styles/m-gudle/ckshm6ky60bm317k1czzixf13"
 
         app:headerLayout="@layout/nav_header_home"
         app:menu="@menu/activity_main_drawer" />

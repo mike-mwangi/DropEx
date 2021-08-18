@@ -16,9 +16,11 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.text.Html;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -39,6 +41,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.bumptech.glide.Glide;
+import com.example.dropex.Common.BottomSheetHandler;
 import com.example.dropex.Common.Common;
 import com.example.dropex.Model.CustomerModel;
 import com.example.dropex.Model.JobSolution;
@@ -55,6 +58,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.graphhopper.directions.api.client.model.GeocodingLocation;
 import com.graphhopper.directions.api.client.model.GeocodingPoint;
+import com.graphhopper.directions.api.client.model.RoutePoint;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
@@ -67,6 +71,7 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.annotations.MarkerView;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.constants.Style;
@@ -79,13 +84,16 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Telemetry;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -108,8 +116,7 @@ import static com.example.dropex.Common.Common.currentCustomer;
 
 public class NavigationLauncherActivity extends AppCompatActivity implements OnMapReadyCallback,
         MapboxMap.OnMapLongClickListener, OnRouteSelectionChangeListener,
-        SolutionInputDialog.NoticeDialogListener, FetchSolutionCallBackInterfaceButWithJobSolution,
-        FetchGeocodingTaskCallbackInterface, GeocodingInputDialog.NoticeDialogListener,
+        FetchSolutionCallBackInterfaceButWithJobSolution,
         PermissionsListener {
 
     private static final int CAMERA_ANIMATION_DURATION = 1000;
@@ -156,22 +163,28 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     private TextView capacityBikeTextView;
     private TextView capacityTruckTextView;
     private TextView capacityCarTextView;
+    private ConstraintLayout bottomSheet;
+    private LayoutInflater inflater;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_navigation_launcher);
-        Mapbox.getInstance(this.getApplicationContext(), getString(R.string.mapbox_access_token));
+        Mapbox.getInstance(this.getApplicationContext(), getString(R.string.dropexpress1));
+        inflater = (LayoutInflater)this.getSystemService(LAYOUT_INFLATER_SERVICE);
+
+
         Telemetry.disableOnUserRequest();
        // ButterKnife.bind(this);
 
-        ConstraintLayout bottomSheet = findViewById(R.id.bottom_sheet_behavior_id);
+        bottomSheet = findViewById(R.id.bottom_sheet_behavior_id);
         bikePriceTextView = bottomSheet.findViewById(R.id.number_of_bikes);
         carPriceTextView = bottomSheet.findViewById(R.id.number_of_cars);
         truckPriceTextView = bottomSheet.findViewById(R.id.number_of_trucks);
-        capacityBikeTextView=bottomSheet.findViewById(R.id.explain_why_bikes);
-        capacityCarTextView=bottomSheet.findViewById(R.id.explain_why_cars);
-        capacityTruckTextView=bottomSheet.findViewById(R.id.explain_why_trucks);
+        capacityBikeTextView= bottomSheet.findViewById(R.id.explain_why_bikes);
+        capacityCarTextView= bottomSheet.findViewById(R.id.explain_why_cars);
+        capacityTruckTextView= bottomSheet.findViewById(R.id.explain_why_trucks);
 
 
         BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
@@ -180,7 +193,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
 
         mapView=findViewById(R.id.mapView);
         loading=findViewById(R.id.loading);
-        mapView.setStyleUrl(Style.TRAFFIC_DAY);
+      //  mapView.setStyleUrl(Style.MAPBOX_STREETS);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
         localeUtils=new LocaleUtils();
@@ -225,6 +238,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     private void init() {
         navigationView.setNavigationItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_sign_out) {
+                /*
                 androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(NavigationLauncherActivity.this);
                 builder.setTitle("Sign out")
                         .setMessage("Are you sure you want to sign out?")
@@ -238,15 +252,13 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
                         }).setCancelable(false);
                 androidx.appcompat.app.AlertDialog dialog = builder.create();
 
-
-
-
-
-
                 dialog.show();
+
+                 */
+                launchNavigationWithRoute();
             }
             else if(item.getItemId() == R.id.nav_home){
-                startActivity(new Intent(this, JobsActivity.class));
+               startActivity(new Intent(this, JobsActivity.class));
 
             }
 
@@ -317,20 +329,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         }
     }
 
-    @SuppressWarnings({"MissingPermission"})
-    @Override
-    public void onResume() {
-        super.onResume();
-        mapView.onResume();
-        handleIntent(getIntent());
-    }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        // getIntent() should always return the most recent
-        setIntent(intent);
-    }
 
     private void handleIntent(Intent intent) {
         if (intent != null) {
@@ -418,32 +417,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
 
 
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        mapView.onPause();
-    }
 
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        mapView.onLowMemory();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mapView.onStop();
-        if (locationLayer != null) {
-            locationLayer.onStop();
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mapView.onDestroy();
-    }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -475,6 +449,16 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         this.mapboxMap = mapboxMap;
         this.mapboxMap.getUiSettings().setAttributionDialogManager(new GHAttributionDialogManager(this.mapView.getContext(), this.mapboxMap));
         this.mapboxMap.addOnMapLongClickListener(this);
+        this.mapboxMap.setOnMarkerClickListener(new MapboxMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(@NonNull @NotNull Marker marker) {
+                long id=marker.getId();
+                final String title = marker.getTitle();
+                View childLayout = inflater.inflate(R.layout.fragment_shipping_item, bottomSheet);
+                BottomSheetHandler.showShipment(title,bottomSheet);
+                return false;
+            }
+        });
         initMapRoute();
 
         this.mapboxMap.setOnInfoWindowClickListener(new MapboxMap.OnInfoWindowClickListener() {
@@ -588,6 +572,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
                 if (validRouteResponse(response)) {
                     route = response.body().routes().get(0);
                     mapRoute.addRoutes(response.body().routes());
+
                     boundCameraToRoute();
                 } else {
                     Snackbar.make(mapView, R.string.error_calculating_route, Snackbar.LENGTH_LONG).show();
@@ -731,9 +716,10 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         );
     }
 
+
     private void launchNavigationWithRoute() {
         if (route == null) {
-            Snackbar.make(mapView, R.string.error_route_not_available, Snackbar.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.error_route_not_available, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -776,10 +762,12 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
 
     }
 
+
+
     private void _launchNavigationWithRoute() {
         NavigationLauncherOptions.Builder optionsBuilder = NavigationLauncherOptions.builder()
-                .shouldSimulateRoute(getShouldSimulateRouteFromSharedPreferences())
-                .directionsProfile(getRouteProfileFromSharedPreferences())
+                .shouldSimulateRoute(true)
+                .directionsProfile(DirectionsCriteria.PROFILE_DRIVING)
                 .waynameChipEnabled(false);
 
         optionsBuilder.directionsRoute(route);
@@ -807,13 +795,15 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         if (route != null) {
             List<Point> routeCoords = LineString.fromPolyline(route.geometry(),
                     Constants.PRECISION_6).coordinates();
+
             List<LatLng> bboxPoints = new ArrayList<>();
             for (Point point : routeCoords) {
                 bboxPoints.add(new LatLng(point.latitude(), point.longitude()));
             }
             if (bboxPoints.size() > 1) {
                 try {
-                    LatLngBounds bounds = new LatLngBounds.Builder().includes(bboxPoints).build();
+                    LatLngBounds bounds = new LatLngBounds.Builder().
+                            includes(bboxPoints).build();
                     // left, top, right, bottom
                     animateCameraBbox(bounds, CAMERA_ANIMATION_DURATION, padding);
                 } catch (InvalidLatLngBoundsException exception) {
@@ -854,20 +844,6 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         updateRouteAfterWaypointChange();
     }
 
-    private void showSolutionInputDialog() {
-        // Create an instance of the dialog fragment and show it
-        SolutionInputDialog dialog = new SolutionInputDialog();
-        dialog.setJobId(currentJobId);
-        dialog.setVehicleId(currentVehicleId);
-        dialog.show(getFragmentManager(), "gh-example");
-    }
-
-    private void showGeocodingInputDialog() {
-        // Create an instance of the dialog fragment and show it
-        GeocodingInputDialog dialog = new GeocodingInputDialog();
-        dialog.setGeocodingInput(currentGeocodingInput);
-        dialog.show(getFragmentManager(), "gh-example");
-    }
     private void fetchVrpSolution(String jobId, String vehicleId) {
         currentJobId = jobId;
         currentVehicleId = vehicleId;
@@ -876,34 +852,13 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         new FetchSolutionTaskButReturnJobSolution(this, getString(R.string.gh_key)).execute(new FetchSolutionConfig(currentJobId, currentVehicleId));
     }
 
-    @Override
-    public void onDialogPositiveClick(DialogFragment dialog) {
-        EditText jobId = dialog.getDialog().findViewById(R.id.job_id);
-        // Check if it's a solution fetch
-        if (jobId != null) {
-            EditText vehicleId = dialog.getDialog().findViewById(R.id.vehicle_id);
 
-            fetchVrpSolution(jobId.getText().toString(), vehicleId.getText().toString());
-        }
-        // Check if it's a geocoding search
-        EditText search = dialog.getDialog().findViewById(R.id.geocoding_input_id);
-        if (search != null) {
-            currentGeocodingInput = search.getText().toString();
-
-            showLoading();
-            String point = null;
-            LatLng pointLatLng = this.mapboxMap.getCameraPosition().target;
-            if (pointLatLng != null)
-                point = pointLatLng.getLatitude() + "," + pointLatLng.getLongitude();
-            new FetchGeocodingTask(this, getString(R.string.gh_key)).execute(new FetchGeocodingConfig(currentGeocodingInput, getLanguageFromSharedPreferences().getLanguage(), 5, false, point, "default"));
-        }
-
-    }
 
     @Override
     public void onError(int message) {
         Snackbar.make(mapView, message, Snackbar.LENGTH_LONG).show();
     }
+    /*
 
     @Override
     public void onPostExecuteGeocodingSearch(List<GeocodingLocation> locations) {
@@ -952,6 +907,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
             if (!snippet.isEmpty())
                 markerOptions.snippet(snippet);
             markerOptions.icon(IconFactory.getInstance(this.getApplicationContext()).fromResource(R.drawable.ic_map_marker));
+            final Marker marker = mapboxMap.addMarker(markerOptions);
             markers.add(mapboxMap.addMarker(markerOptions));
         }
 
@@ -967,6 +923,8 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         hideLoading();
     }
 
+
+     */
     @Override
     public void onPostExecute(JobSolution jobSolution) {
         List<Point> points=jobSolution.getPoints();
@@ -974,7 +932,6 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
             // Remove the first point if we want to start from the current location
 
         }
-
         setVehiclePrices(jobSolution.getCosts());
         updateWaypoints(points);
     }
@@ -1000,5 +957,45 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
             Toast.makeText(this, "You didn't grant location permissions.",
                     Toast.LENGTH_LONG).show();
         }
+    }
+    @Override
+    public void onPause() {
+        super.onPause();
+        mapView.onPause();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mapView.onLowMemory();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mapView.onStop();
+        if (locationLayer != null) {
+            locationLayer.onStop();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mapView.onDestroy();
+    }
+    @SuppressWarnings({"MissingPermission"})
+    @Override
+    public void onResume() {
+        super.onResume();
+        mapView.onResume();
+        handleIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        // getIntent() should always return the most recent
+        setIntent(intent);
     }
 }
