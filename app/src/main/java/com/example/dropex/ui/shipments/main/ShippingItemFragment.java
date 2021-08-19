@@ -59,7 +59,6 @@ import retrofit2.Call;
 import retrofit2.Response;
 import timber.log.Timber;
 
-import static com.example.dropex.Common.Common.currentCustomer;
 
 
 public class ShippingItemFragment extends Fragment implements FetchGeocodingTaskCallbackInterface, AutoCompleteAdapter.OnItemClickListener{

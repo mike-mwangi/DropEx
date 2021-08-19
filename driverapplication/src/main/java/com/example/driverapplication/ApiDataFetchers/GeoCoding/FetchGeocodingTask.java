@@ -1,7 +1,8 @@
-package com.example.driverapplication;
+package com.example.driverapplication.ApiDataFetchers.GeoCoding;
 
 import android.os.AsyncTask;
 
+import com.example.driverapplication.R;
 import com.graphhopper.directions.api.client.ApiException;
 import com.graphhopper.directions.api.client.api.GeocodingApi;
 import com.graphhopper.directions.api.client.model.GeocodingLocation;

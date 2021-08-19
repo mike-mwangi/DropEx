@@ -44,6 +44,7 @@ import com.bumptech.glide.Glide;
 import com.example.dropex.Common.BottomSheetHandler;
 import com.example.dropex.Common.Common;
 import com.example.dropex.Model.CustomerModel;
+import com.example.dropex.Model.Job;
 import com.example.dropex.Model.JobSolution;
 import com.example.dropex.ui.home.HomeActivity;
 import com.example.dropex.ui.job.JobsActivity;
@@ -59,6 +60,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.graphhopper.directions.api.client.model.GeocodingLocation;
 import com.graphhopper.directions.api.client.model.GeocodingPoint;
 import com.graphhopper.directions.api.client.model.RoutePoint;
+import com.graphhopper.directions.api.client.model.Solution;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
@@ -112,7 +114,6 @@ import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Response;
 
-import static com.example.dropex.Common.Common.currentCustomer;
 
 public class NavigationLauncherActivity extends AppCompatActivity implements OnMapReadyCallback,
         MapboxMap.OnMapLongClickListener, OnRouteSelectionChangeListener,
@@ -165,11 +166,13 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     private TextView capacityCarTextView;
     private ConstraintLayout bottomSheet;
     private LayoutInflater inflater;
+    private CustomerModel customer;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        customer = ((UserClient)getApplicationContext()).getCustomer();
         setContentView(R.layout.activity_navigation_launcher);
         Mapbox.getInstance(this.getApplicationContext(), getString(R.string.dropexpress1));
         inflater = (LayoutInflater)this.getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -269,16 +272,15 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         View headerView = navigationView.getHeaderView(0);
         TextView text_name = (TextView)headerView.findViewById(R.id.text_name);
 
-        CustomerModel customerModel=Common.getCurrentCustomer();
 
         img_avatar = (ImageView)headerView.findViewById(R.id.user_avatar);
         Glide
                 .with(this)
-                .load(customerModel .getUserImageUrl())
+                .load(customer.getUserImageUrl())
                 .into(img_avatar);
 
 
-        text_name.setText(customerModel.getFirstName()+" "+customerModel.getLastName());
+        text_name.setText(customer.getFirstName()+" "+ customer.getLastName());
 
 
     }
@@ -927,13 +929,15 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
 
 
      */
+
     @Override
-    public void onPostExecute(JobSolution jobSolution) {
-        List<Point> points=jobSolution.getPoints();
+    public void onPostExecute(Solution jobSolution) {
+        List<Point> points= JobSolution.gePoints(jobSolution.getRoutes());
         if (getStartFromLocationFromSharedPreferences() && !points.isEmpty()) {
             // Remove the first point if we want to start from the current location
 
         }
+
         setVehiclePrices(jobSolution.getCosts());
         updateWaypoints(points);
     }

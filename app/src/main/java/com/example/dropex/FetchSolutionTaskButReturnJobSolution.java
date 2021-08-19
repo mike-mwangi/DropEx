@@ -18,7 +18,7 @@ import java.util.List;
 
 import timber.log.Timber;
 
-public class FetchSolutionTaskButReturnJobSolution extends AsyncTask<FetchSolutionConfig, Void, JobSolution> {
+public class FetchSolutionTaskButReturnJobSolution extends AsyncTask<FetchSolutionConfig, Void, Solution> {
 
     private final String ghKey;
     private final FetchSolutionCallBackInterfaceButWithJobSolution callbackInterface;
@@ -29,25 +29,23 @@ public class FetchSolutionTaskButReturnJobSolution extends AsyncTask<FetchSoluti
     }
 
     @Override
-    protected JobSolution doInBackground(FetchSolutionConfig... solutions) {
+    protected Solution doInBackground(FetchSolutionConfig... solutions) {
 
         if (solutions.length != 1)
             throw new IllegalArgumentException("It's only possible to fetch one solution at a time");
 
         List<Point> points = new ArrayList<>();
         SolutionApi api = new SolutionApi();
-        JobSolution jobSolution=new JobSolution();
+        Solution jobSolution=new Solution();
 
         try {
             com.graphhopper.directions.api.client.model.Response res = api.getSolution(ghKey, solutions[0].jobId);
             Log.e("FETCHSOLUTIONTASK",solutions[0].jobId);
             List<Route> routes = res.getSolution().getRoutes();
             final Solution solution = res.getSolution();
-            jobSolution.setNoVehicles(solution.getNoVehicles());
-            jobSolution.setCosts(solution.getCosts());
-            jobSolution.setTime(solution.getTime());
-            jobSolution.setCompletionTime(solution.getCompletionTime());
-            jobSolution.setDistance(solution.getDistance());
+            jobSolution=solution;
+
+
 
             for (Route route : routes) {
                 if (route.getVehicleId().equals(solutions[0].vehicleId) || solutions[0].vehicleId == null) {
@@ -68,7 +66,7 @@ public class FetchSolutionTaskButReturnJobSolution extends AsyncTask<FetchSoluti
                 callbackInterface.onError(R.string.error_vehicle_not_found);
             }
             else {
-                jobSolution.setPoints(points);
+
             }
         } catch (ApiException e) {
             callbackInterface.onError(R.string.error_fetching_solution);
@@ -79,7 +77,7 @@ public class FetchSolutionTaskButReturnJobSolution extends AsyncTask<FetchSoluti
     }
 
     @Override
-    protected void onPostExecute(JobSolution jobSolution) {
+    protected void onPostExecute(Solution jobSolution) {
         callbackInterface.onPostExecute(jobSolution);
     }
 }

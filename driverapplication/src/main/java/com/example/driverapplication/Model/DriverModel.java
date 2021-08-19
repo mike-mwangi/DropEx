@@ -2,19 +2,27 @@ package com.example.driverapplication.Model;
 
 public class DriverModel {
 
-    private String firstName, lastName, phoneNumber, email, city;
+
+    private String firstName, lastName, phoneNumber, email, city,userImageUrl;
 
     public DriverModel() {}
 
-    public DriverModel(String firstName, String lastName, String phoneNumber, String email, String city) {
+    public DriverModel(String firstName, String lastName, String phoneNumber, String email, String city,String userImageUrl) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.city = city;
-//        this.userImageUrl = userImageUrl;
+        this.userImageUrl = userImageUrl;
     }
 
+    public String getUserImageUrl() {
+        return userImageUrl;
+    }
+
+    public void setUserImageUrl(String userImageUrl) {
+        this.userImageUrl = userImageUrl;
+    }
 
     public String getFirstName() {
         return firstName;

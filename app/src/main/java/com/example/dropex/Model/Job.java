@@ -18,6 +18,7 @@ import com.graphhopper.directions.api.client.model.Address;
 import com.graphhopper.directions.api.client.model.GeocodingLocation;
 import com.graphhopper.directions.api.client.model.Service;
 import com.graphhopper.directions.api.client.model.Shipment;
+import com.graphhopper.directions.api.client.model.Solution;
 import com.graphhopper.directions.api.client.model.Stop;
 import com.graphhopper.directions.api.client.model.Vehicle;
 
@@ -37,7 +38,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
-import static com.example.dropex.Common.Common.currentCustomer;
 
 public class Job {
 
@@ -48,17 +48,17 @@ public class Job {
     private GeocodingLocation pickUpLocation;
     private boolean hasBeenFulfilled=false;
     private int cost;
-    public JobSolution solution;
+    public Solution solution;
 
     @ServerTimestamp
     Date time;
 
 
-    public JobSolution getSolution() {
+    public Solution getSolution() {
         return solution;
     }
 
-    public void setSolution(JobSolution solution) {
+    public void setSolution(Solution solution) {
         this.solution = solution;
     }
 

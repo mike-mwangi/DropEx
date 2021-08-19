@@ -1,4 +1,4 @@
-package com.example.driverapplication;
+package com.example.driverapplication.ui.profile.Register;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,6 +15,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.example.driverapplication.Model.DriverModel;
 
+import com.example.driverapplication.R;
+import com.example.driverapplication.ui.profile.Login.LoginActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -125,7 +127,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            DriverModel driver = new DriverModel(firstName, lastName, phone_number, email, city);
+                            DriverModel driver = new DriverModel(firstName, lastName, phone_number, email, city,"");
 
                             FirebaseDatabase.getInstance().getReference("Drivers")
                                     .child(FirebaseAuth.getInstance().getCurrentUser().getUid())

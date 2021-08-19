@@ -24,12 +24,15 @@ import com.example.dropex.FetchSolutionTaskButReturnJobSolution;
 import com.example.dropex.FetchSolutionTaskCallbackInterface;
 import com.example.dropex.Model.CustomService;
 import com.example.dropex.Model.CustomVehicle;
+import com.example.dropex.Model.CustomerModel;
 import com.example.dropex.Model.Job;
 import com.example.dropex.Model.JobSolution;
 import com.example.dropex.NavigationLauncherActivity;
 import com.example.dropex.R;
 
+import com.example.dropex.UserClient;
 import com.example.dropex.ui.main.OnboardingFragment;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -41,6 +44,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.gson.Gson;
 import com.graphhopper.directions.api.client.model.Service;
 import com.graphhopper.directions.api.client.model.Shipment;
+import com.graphhopper.directions.api.client.model.Solution;
 import com.mapbox.geojson.Point;
 
 import org.jetbrains.annotations.NotNull;
@@ -55,7 +59,7 @@ import java.util.Map;
 
 import okhttp3.Callback;
 
-import static com.example.dropex.Common.Common.currentCustomer;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -74,6 +78,7 @@ public String TAG=this.getTag();
     private ViewPager2 viewPager;
     private OnBoardingViewPagerAdapter adapter;
     NavController navController;
+    private CustomerModel currentCustomer;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -96,6 +101,7 @@ public String TAG=this.getTag();
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        currentCustomer=((UserClient)getActivity().getApplicationContext()).getCustomer();
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -203,7 +209,13 @@ public String TAG=this.getTag();
                                 Log.e("JOB ID",jobID);
                                 currentCustomer.getCurrentJob().setJobID(jobID);
                                 currentCustomer.getCurrentJob().setSolution(jobSolution);
-                                FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid()).collection("jobs").document(currentCustomer.getCurrentJob().getJobID()).set(currentCustomer.getCurrentJob());
+                                ((UserClient)getActivity().getApplicationContext()).setCustomer(currentCustomer);
+                                FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid()).collection("jobs").document(currentCustomer.getCurrentJob().getJobID()).set(currentCustomer.getCurrentJob()).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull @NotNull Exception e) {
+                                        Log.e("Shippin",e.toString());
+                                    }
+                                });
                                 Job job=currentCustomer.getCurrentJob();
                                // new FetchSolutionTaskButReturnJobSolution(ShippingInformationFragment.this,getString(R.string.gh_key)).execute(new FetchSolutionConfig(job.getJobID(), "default"));
 
@@ -212,11 +224,16 @@ public String TAG=this.getTag();
                                 String uriString="https://graphhopper.com/api/1/vrp/solution/"+currentCustomer.getCurrentJob().getJobID()+"?vehicle_id="+"default"+"&key="+getString(R.string.gh_key);
                                 Uri uri=Uri.parse("https://graphhopper.com/api/1/vrp/solution/"+currentCustomer.getCurrentJob().getJobID()+"?vehicle_id="+"default"+"&key="+getString(R.string.gh_key));
                                 goToNavLauncher.setData(uri);
-                                FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid()).collection("jobs").document(currentCustomer.getCurrentJob().getJobID()).set(currentCustomer.getCurrentJob());
+                                FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid()).collection("jobs").document(currentCustomer.getCurrentJob().getJobID()).set(currentCustomer.getCurrentJob()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull @NotNull Task<Void> task) {
+                                        new FetchSolutionTaskButReturnJobSolution(ShippingInformationFragment.this, getString(R.string.gh_key)).execute(new FetchSolutionConfig(job.getJobID(), "default"));
+                                    }
+                                });
                                 Log.e("URI", String.valueOf(uri));
                                 Log.e("URI string", uriString);
 
-                                startActivity(goToNavLauncher);
+                               // startActivity(goToNavLauncher);
 
 
 
@@ -246,13 +263,15 @@ public String TAG=this.getTag();
     }
 
     @Override
-    public void onPostExecute(JobSolution jobSolution) {
+    public void onPostExecute(Solution jobSolution) {
         Map<String,Object> solution=new HashMap<>();
         solution.put("solution",jobSolution);
         final Task<Void> update = FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid()).collection("jobs").document(currentCustomer.getCurrentJob().getJobID()).update(solution);
         update.addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void unused) {
+                Intent goToNavLauncher=new Intent(ShippingInformationFragment.this.getActivity(), NavigationLauncherActivity.class);
+                startActivity(goToNavLauncher);
 
             }
         });
@@ -262,11 +281,14 @@ public String TAG=this.getTag();
                 Log.e(TAG,e.toString());
             }
         });
+        /*
         ShippingInformationFragmentDirections.ActionShippingInformationToMeansOfTransport toMeansOfTransport=
                     ShippingInformationFragmentDirections.actionShippingInformationToMeansOfTransport();
         int costs= jobSolution.getCosts();
         toMeansOfTransport.setCost(((Integer)costs));
        navController.navigate(toMeansOfTransport);
+
+         */
 
 
     }

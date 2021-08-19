@@ -1,4 +1,4 @@
-package com.example.driverapplication;
+package com.example.driverapplication.ApiDataFetchers.GeoCoding;
 
 import com.graphhopper.directions.api.client.model.GeocodingLocation;
 

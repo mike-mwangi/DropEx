@@ -1,4 +1,4 @@
-package com.example.driverapplication;
+package com.example.driverapplication.ApiDataFetchers.Solution;
 
 public class FetchSolutionConfig {
 

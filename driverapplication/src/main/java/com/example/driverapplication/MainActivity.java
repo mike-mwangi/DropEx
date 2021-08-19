@@ -11,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.driverapplication.Model.DriverModel;
+import com.example.driverapplication.ui.profile.Login.LoginActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -19,22 +20,16 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.sql.Driver;
-
 public class MainActivity extends AppCompatActivity {
 
     private Button logoutBtn;
-
-    private FirebaseUser user;
-    private DatabaseReference ref;
-
-    private String userId;
+    private DriverModel driverModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        driverModel=((DriverClient)getApplicationContext()).getDriver();
         logoutBtn = (Button) findViewById(R.id.logoutBtn);
         logoutBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -45,31 +40,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        user = FirebaseAuth.getInstance().getCurrentUser();
-        ref = FirebaseDatabase.getInstance().getReference("Drivers");
-        userId = user.getUid();
-
         final TextView emailTextView = (TextView) findViewById(R.id.emailTextView);
 
-        ref.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                DriverModel driver = snapshot.getValue(DriverModel.class);
+        emailTextView.setText(driverModel.getEmail());
 
-                if (driver != null){
-                    String email = driver.getEmail();
-
-                    emailTextView.setText(email);
-
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(MainActivity.this, "Error Occurred!", Toast.LENGTH_LONG).show();
-
-            }
-        });
     }
 }
