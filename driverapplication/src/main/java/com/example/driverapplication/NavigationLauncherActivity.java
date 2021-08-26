@@ -8,16 +8,23 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+
 import android.provider.Settings;
 import android.text.Html;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,20 +33,31 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
 
-
-import com.example.driverapplication.Model.JobSolution;
+import com.bumptech.glide.Glide;
+import com.example.driverapplication.Model.DriverModel;
+import com.example.driverapplication.NavigationViewSettingsActivity;
+import com.example.driverapplication.R;
+import com.example.driverapplication.Service.TrackingService;
 import com.example.driverapplication.ui.profile.ProfileActivity;
+import com.example.driverapplication.ui.profile.main.WelcomeActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.graphhopper.directions.api.client.model.GeocodingLocation;
 import com.graphhopper.directions.api.client.model.GeocodingPoint;
+import com.graphhopper.directions.api.client.model.RoutePoint;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
@@ -52,6 +70,7 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.annotations.MarkerView;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.constants.Style;
@@ -64,24 +83,36 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Telemetry;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
+import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Response;
 
-public class NavigationLauncherActivity extends AppCompatActivity implements OnMapReadyCallback,
-        MapboxMap.OnMapLongClickListener, OnRouteSelectionChangeListener,
-        FetchSolutionCallBackInterfaceButWithJobSolution,
-        FetchGeocodingTaskCallbackInterface,
+
+
+public class NavigationLauncherActivity extends AppCompatActivity implements OnMapReadyCallback, OnRouteSelectionChangeListener,
         PermissionsListener {
 
     private static final int CAMERA_ANIMATION_DURATION = 1000;
@@ -95,8 +126,6 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     private NavigationMapRoute mapRoute;
     private MapboxMap mapboxMap;
     private PermissionsManager permissionsManager;
-
-
 
     MapView mapView;
     ProgressBar loading;
@@ -122,35 +151,46 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     private TextView bikePriceTextView;
     private TextView truckPriceTextView;
     private TextView carPriceTextView;
-
     private TextView capacityBikeTextView;
     private TextView capacityTruckTextView;
     private TextView capacityCarTextView;
+    private ConstraintLayout bottomSheet;
+    private MaterialButton startWork;
+    private LayoutInflater inflater;
+
+    private DriverModel driverModel;
+    private LocationListener locationListener;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        driverModel=((DriverClient) getApplicationContext()).getDriver();
         setContentView(R.layout.activity_navigation_launcher);
-        Mapbox.getInstance(this.getApplicationContext(), getString(R.string.mapbox_access_token));
+        Mapbox.getInstance(this.getApplicationContext(), getString(R.string.access_token));
+        inflater = (LayoutInflater)this.getSystemService(LAYOUT_INFLATER_SERVICE);
+
         Telemetry.disableOnUserRequest();
-       // ButterKnife.bind(this);
+        // ButterKnife.bind(this);
 
-        ConstraintLayout bottomSheet = findViewById(R.id.bottom_sheet_behavior_id);
-        bikePriceTextView = bottomSheet.findViewById(R.id.number_of_bikes);
-        carPriceTextView = bottomSheet.findViewById(R.id.number_of_cars);
-        truckPriceTextView = bottomSheet.findViewById(R.id.number_of_trucks);
-        capacityBikeTextView=bottomSheet.findViewById(R.id.explain_why_bikes);
-        capacityCarTextView=bottomSheet.findViewById(R.id.explain_why_cars);
-        capacityTruckTextView=bottomSheet.findViewById(R.id.explain_why_trucks);
-
-
+        bottomSheet = findViewById(R.id.bottom_sheet_behavior_id);
+        startWork=bottomSheet.findViewById(R.id.start_work_btn);
         BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
 
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        bottomSheetBehavior.setDraggable(false);
+        startWork.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        startService(new Intent(NavigationLauncherActivity.this, TrackingService.class));
+                    }
+                }
+        );
 
         mapView=findViewById(R.id.mapView);
         loading=findViewById(R.id.loading);
-        mapView.setStyleUrl(Style.TRAFFIC_DAY);
+        //  mapView.setStyleUrl(Style.MAPBOX_STREETS);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
         localeUtils=new LocaleUtils();
@@ -172,24 +212,8 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         });
 
 
-   /*     NavHostFragment fragment= (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_content_home);
-        NavController navController = fragment.getNavController();
-        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
-        NavigationUI.setupWithNavController(navigationView, navController);
-
-    */
-
         init();
         showFirstStartIfNecessary();
-    }
-    private void setVehiclePrices(Integer cost){
-        int bikePrice=cost*2;
-        bikePriceTextView.setText(String.valueOf(bikePrice)+" Kshs");
-        carPriceTextView.setText(String.valueOf(cost*2.7)+" Kshs");
-        truckPriceTextView.setText(String.valueOf(cost*3)+" Kshs");
-        capacityBikeTextView.setText("capacity < 5kg");
-        capacityCarTextView.setText("capacity < 200kg");
-        capacityTruckTextView.setText("capacity < 1000kg");
     }
 
     private void init() {
@@ -201,17 +225,23 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
                         .setNegativeButton("CANCEL", (dialogInterface, i) -> dialogInterface.dismiss())
                         .setPositiveButton("SIGN OUT", (dialogInterface, i) -> {
                             FirebaseAuth.getInstance().signOut();
+                            Intent intent = new Intent(NavigationLauncherActivity.this, WelcomeActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
+                            finish();
                         }).setCancelable(false);
                 androidx.appcompat.app.AlertDialog dialog = builder.create();
 
-
-
-
-
-
                 dialog.show();
+
+
             }
             else if(item.getItemId() == R.id.nav_home){
+      //          startActivity(new Intent(this, JobsActivity.class));
+
+            }
+            else if(item.getItemId() == R.id.nav_work_mode){
+                startService(new Intent(this, TrackingService.class));
 
             }
 
@@ -222,42 +252,27 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         View headerView = navigationView.getHeaderView(0);
         TextView text_name = (TextView)headerView.findViewById(R.id.text_name);
 
+        img_avatar = (ImageView)headerView.findViewById(R.id.user_avatar);
+      Glide
+                .with(this)
+                .load(driverModel .getUserImageUrl())
+                .into(img_avatar);
 
 
-//        img_avatar = (ImageView)headerView.findViewById(R.id.user_avatar);
-//        Glide
-//                .with(this)
-//                .load(customerModel .getUserImageUrl())
-//                .into(img_avatar);
-//
-//
-//        text_name.setText(customerModel.getFirstName()+" "+customerModel.getLastName());
+
+
+        text_name.setText(driverModel.getFirstName()+" "+driverModel.getLastName());
 
 
     }
-
-  /*  @Override
-    public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_home);
-        return NavigationUI.navigateUp(navController, mAppBarConfiguration)
-                || super.onSupportNavigateUp();
-    }
-
-   */
 
     public void showProfileAFragment(View view) {
-       startActivity(new Intent(NavigationLauncherActivity.this, ProfileActivity.class));
-       overridePendingTransition(R.anim.fade_in,R.anim.fade_out);
+        startActivity(new Intent(NavigationLauncherActivity.this, ProfileActivity.class));
+        overridePendingTransition(R.anim.fade_in,R.anim.fade_out);
 
     }
 
 
-
-
-
-    private void showSettings() {
-        startActivityForResult(new Intent(this, NavigationViewSettingsActivity.class), CHANGE_SETTING_REQUEST_CODE);
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -282,55 +297,12 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         }
     }
 
-    @SuppressWarnings({"MissingPermission"})
-    @Override
-    public void onResume() {
-        super.onResume();
-        mapView.onResume();
-        handleIntent(getIntent());
-    }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        // getIntent() should always return the most recent
-        setIntent(intent);
-    }
 
     private void handleIntent(Intent intent) {
         if (intent != null) {
             Uri data = intent.getData();
-            if (data != null && "graphhopper.com".equals(data.getHost())) {
-                if (data.getPath() != null) {
-                    if (this.mapboxMap == null) {
-                        //this happens when onResume is called at the initial start and we will call this method again in onMapReady
-                        return;
-                    }
-                    if (data.getPath().contains("maps")) {
-                        clearRoute();
-                        //Open Map Url
-                        setRouteProfileToSharedPreferences(data.getQueryParameter("vehicle"));
 
-                        List<String> points = data.getQueryParameters("point");
-                        for (String point : points) {
-                            String[] pointArr = point.split(",");
-                            addPointToRoute(Double.parseDouble(pointArr[0]), Double.parseDouble(pointArr[1]));
-                        }
-
-                        setStartFromLocationToSharedPreferences(false);
-                        updateRouteAfterWaypointChange();
-                    }
-                    // https://graphhopper.com/api/1/vrp/solution/e7fb8a9b-e441-4ec2-a487-20788e591bb3?vehicle_id=1&key=[KEY]
-                    if (data.getPath().contains("api/1/vrp/solution")) {
-                        clearRoute();
-                        //Open Vrp Url
-                        List<String> pathSegments = data.getPathSegments();
-                        Log.e("job id in navlauncher",pathSegments.get(pathSegments.size()-1));
-                        fetchVrpSolution(pathSegments.get(pathSegments.size() - 1), data.getQueryParameter("vehicle_id"));
-                    }
-                }
-
-            }
         }
     }
 
@@ -383,32 +355,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
 
 
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        mapView.onPause();
-    }
 
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        mapView.onLowMemory();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mapView.onStop();
-        if (locationLayer != null) {
-            locationLayer.onStop();
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mapView.onDestroy();
-    }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -438,8 +385,17 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     @Override
     public void onMapReady(MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
-        this.mapboxMap.getUiSettings().setAttributionDialogManager(new GHAttributionDialogManager(this.mapView.getContext(), this.mapboxMap));
-        this.mapboxMap.addOnMapLongClickListener(this);
+      //  this.mapboxMap.getUiSettings().setAttributionDialogManager(new GHAttributionDialogManager(this.mapView.getContext(), this.mapboxMap));
+        this.mapboxMap.setOnMarkerClickListener(new MapboxMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(@NonNull @NotNull Marker marker) {
+                long id=marker.getId();
+                final String title = marker.getTitle();
+               // View childLayout = inflater.inflate(R.layout.fragment_shipping_item, bottomSheet);
+               // BottomSheetHandler.showShipment(title,bottomSheet);
+                return false;
+            }
+        });
         initMapRoute();
 
         this.mapboxMap.setOnInfoWindowClickListener(new MapboxMap.OnInfoWindowClickListener() {
@@ -469,12 +425,6 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         handleIntent(getIntent());
     }
 
-    @Override
-    public void onMapLongClick(@NonNull LatLng point) {
-        addPointToRoute(point.getLatitude(), point.getLongitude());
-        updateRouteAfterWaypointChange();
-
-    }
 
     private void addPointToRoute(double lat, double lng) {
         waypoints.add(Point.fromLngLat(lng, lat));
@@ -553,6 +503,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
                 if (validRouteResponse(response)) {
                     route = response.body().routes().get(0);
                     mapRoute.addRoutes(response.body().routes());
+
                     boundCameraToRoute();
                 } else {
                     Snackbar.make(mapView, R.string.error_calculating_route, Snackbar.LENGTH_LONG).show();
@@ -696,9 +647,10 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         );
     }
 
+
     private void launchNavigationWithRoute() {
         if (route == null) {
-            Snackbar.make(mapView, R.string.error_route_not_available, Snackbar.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.error_route_not_available, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -741,10 +693,12 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
 
     }
 
+
+
     private void _launchNavigationWithRoute() {
         NavigationLauncherOptions.Builder optionsBuilder = NavigationLauncherOptions.builder()
-                .shouldSimulateRoute(getShouldSimulateRouteFromSharedPreferences())
-                .directionsProfile(getRouteProfileFromSharedPreferences())
+                .shouldSimulateRoute(true)
+                .directionsProfile(DirectionsCriteria.PROFILE_DRIVING)
                 .waynameChipEnabled(false);
 
         optionsBuilder.directionsRoute(route);
@@ -772,13 +726,15 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         if (route != null) {
             List<Point> routeCoords = LineString.fromPolyline(route.geometry(),
                     Constants.PRECISION_6).coordinates();
+
             List<LatLng> bboxPoints = new ArrayList<>();
             for (Point point : routeCoords) {
                 bboxPoints.add(new LatLng(point.latitude(), point.longitude()));
             }
             if (bboxPoints.size() > 1) {
                 try {
-                    LatLngBounds bounds = new LatLngBounds.Builder().includes(bboxPoints).build();
+                    LatLngBounds bounds = new LatLngBounds.Builder().
+                            includes(bboxPoints).build();
                     // left, top, right, bottom
                     animateCameraBbox(bounds, CAMERA_ANIMATION_DURATION, padding);
                 } catch (InvalidLatLngBoundsException exception) {
@@ -818,21 +774,8 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         this.waypoints = points;
         updateRouteAfterWaypointChange();
     }
+    /*
 
-    private void showSolutionInputDialog() {
-        // Create an instance of the dialog fragment and show it
-        SolutionInputDialog dialog = new SolutionInputDialog();
-        dialog.setJobId(currentJobId);
-        dialog.setVehicleId(currentVehicleId);
-        dialog.show(getFragmentManager(), "gh-example");
-    }
-
-    private void showGeocodingInputDialog() {
-        // Create an instance of the dialog fragment and show it
-        GeocodingInputDialog dialog = new GeocodingInputDialog();
-        dialog.setGeocodingInput(currentGeocodingInput);
-        dialog.show(getFragmentManager(), "gh-example");
-    }
     private void fetchVrpSolution(String jobId, String vehicleId) {
         currentJobId = jobId;
         currentVehicleId = vehicleId;
@@ -841,36 +784,16 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         new FetchSolutionTaskButReturnJobSolution(this, getString(R.string.gh_key)).execute(new FetchSolutionConfig(currentJobId, currentVehicleId));
     }
 
-//    @Override
-//    public void onDialogPositiveClick(DialogFragment dialog) {
-//        EditText jobId = dialog.getDialog().findViewById(R.id.job_id);
-//        // Check if it's a solution fetch
-//        if (jobId != null) {
-//            EditText vehicleId = dialog.getDialog().findViewById(R.id.vehicle_id);
-//
-//            fetchVrpSolution(jobId.getText().toString(), vehicleId.getText().toString());
-//        }
-//        // Check if it's a geocoding search
-//        EditText search = dialog.getDialog().findViewById(R.id.geocoding_input_id);
-//        if (search != null) {
-//            currentGeocodingInput = search.getText().toString();
-//
-//            showLoading();
-//            String point = null;
-//            LatLng pointLatLng = this.mapboxMap.getCameraPosition().target;
-//            if (pointLatLng != null)
-//                point = pointLatLng.getLatitude() + "," + pointLatLng.getLongitude();
-//            new FetchGeocodingTask(this, getString(R.string.gh_key)).execute(new FetchGeocodingConfig(currentGeocodingInput, getLanguageFromSharedPreferences().getLanguage(), 5, false, point, "default"));
-//        }
-//
-//    }
+     */
 
-    @Override
+
+
     public void onError(int message) {
-        Snackbar.make(mapView, message, Snackbar.LENGTH_LONG).show();
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
 
+    /*
 
     @Override
     public void onPostExecuteGeocodingSearch(List<GeocodingLocation> locations) {
@@ -919,6 +842,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
             if (!snippet.isEmpty())
                 markerOptions.snippet(snippet);
             markerOptions.icon(IconFactory.getInstance(this.getApplicationContext()).fromResource(R.drawable.ic_map_marker));
+            final Marker marker = mapboxMap.addMarker(markerOptions);
             markers.add(mapboxMap.addMarker(markerOptions));
         }
 
@@ -934,6 +858,8 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         hideLoading();
     }
 
+
+
     @Override
     public void onPostExecute(JobSolution jobSolution) {
         List<Point> points=jobSolution.getPoints();
@@ -941,10 +867,11 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
             // Remove the first point if we want to start from the current location
 
         }
-
         setVehiclePrices(jobSolution.getCosts());
         updateWaypoints(points);
     }
+
+     */
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
@@ -967,5 +894,51 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
             Toast.makeText(this, "You didn't grant location permissions.",
                     Toast.LENGTH_LONG).show();
         }
+    }
+    @Override
+    public void onPause() {
+        super.onPause();
+        mapView.onPause();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mapView.onLowMemory();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mapView.onStop();
+        if (locationLayer != null) {
+            locationLayer.onStop();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mapView.onDestroy();
+    }
+    @SuppressWarnings({"MissingPermission"})
+    @Override
+    public void onResume() {
+        super.onResume();
+        mapView.onResume();
+        handleIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        // getIntent() should always return the most recent
+        setIntent(intent);
+    }
+
+    public void startWork(View view) {
+
+        FirebaseMessaging.getInstance().subscribeToTopic(driverModel.getVehicle().getCustomVehicleType().getProfile().getValue());
+
     }
 }

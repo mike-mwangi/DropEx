@@ -64,6 +64,7 @@
 
 
     <string name="access_token" translatable="false">sk.eyJ1IjoibS1ndWRsZSIsImEiOiJja3Jzd3BtYXQzZTUxMzFwZW5lOWpsZnRjIn0.QIdA-7eQZBC6G_K54vutQA</string>
+    <string name="dropexpress1" translatable="false">sk.eyJ1IjoibS1ndWRsZSIsImEiOiJja3NobGcwNHkwMWNsMm9uY2lxOXhpeGVlIn0.Qo2hlm6msn9s-HLrx2fKpw</string>
     <string name="user_location_permission_explanation">This app needs location permissions to show its functionality.</string>
     <string name="user_location_permission_not_granted">You didnt grant location permissions.</string>
 
@@ -151,5 +152,8 @@
     <string name="menu_jobs">Jobs</string>
     <string name="pickup_address">Pickup address</string>
     <string name="mot_information">Means Of Transport</string>
+    <string name="delete">Delete</string>
+    <string name="label_job">Job</string>
+    <string name="saveAndEstimate">Save and estimate price</string>
 
 </resources>

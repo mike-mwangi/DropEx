@@ -2,40 +2,34 @@ package com.example.driverapplication.Model;
 
 
 import com.graphhopper.directions.api.client.model.Vehicle;
+import com.graphhopper.directions.api.client.model.VehicleType;
 import com.mapbox.geojson.Point;
 
 public class CustomVehicle extends Vehicle {
-    private String driverName;
+    private String driverID;
     private String vehiclePlateNumber;
-    private Point driverLocation;
-    private CustomVehicleType customVehicleType;
-    private int icon;
 
-    public CustomVehicle(String driverName, String vehiclePlateNumber, Point driverLocation, CustomVehicleType customVehicleType,int icon) {
-        this.driverName = driverName;
+    private VehicleType vehicleType;
+
+    public CustomVehicle(String driverName, String vehiclePlateNumber, VehicleType vehicleType) {
+        this.driverID = driverName;
         this.vehiclePlateNumber = vehiclePlateNumber;
-        this.driverLocation = driverLocation;
-        this.customVehicleType = customVehicleType;
-        this.icon=icon;
+
+        this.vehicleType=vehicleType;
+
     }
 
     public CustomVehicle() {
     }
 
-    public int getIcon() {
-        return icon;
+
+
+    public String getDriverID() {
+        return driverID;
     }
 
-    public void setIcon(int icon) {
-        this.icon = icon;
-    }
-
-    public String getDriverName() {
-        return driverName;
-    }
-
-    public void setDriverName(String driverName) {
-        this.driverName = driverName;
+    public void setDriverID(String driverName) {
+        this.driverID = driverName;
     }
 
     public String getVehiclePlateNumber() {
@@ -46,19 +40,12 @@ public class CustomVehicle extends Vehicle {
         this.vehiclePlateNumber = vehiclePlateNumber;
     }
 
-    public Point getDriverLocation() {
-        return driverLocation;
+
+    public VehicleType getCustomVehicleType() {
+        return vehicleType;
     }
 
-    public void setDriverLocation(Point driverLocation) {
-        this.driverLocation = driverLocation;
-    }
-
-    public CustomVehicleType getCustomVehicleType() {
-        return customVehicleType;
-    }
-
-    public void setCustomVehicleType(CustomVehicleType customVehicleType) {
-        this.customVehicleType = customVehicleType;
+    public void setCustomVehicleType(VehicleType vehicleType) {
+        this.vehicleType = vehicleType;
     }
 }

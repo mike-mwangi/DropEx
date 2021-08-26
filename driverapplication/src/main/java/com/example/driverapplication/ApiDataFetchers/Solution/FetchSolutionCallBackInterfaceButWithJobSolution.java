@@ -1,4 +1,4 @@
-package com.example.driverapplication;
+package com.example.driverapplication.ApiDataFetchers.Solution;
 
 import com.example.driverapplication.Model.JobSolution;
 

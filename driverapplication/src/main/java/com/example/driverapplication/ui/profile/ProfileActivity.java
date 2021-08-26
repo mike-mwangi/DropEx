@@ -16,8 +16,10 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.example.driverapplication.DriverClient;
 import com.example.driverapplication.Model.DriverModel;
 import com.example.driverapplication.R;
+import com.example.driverapplication.util.Common;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -50,16 +52,16 @@ public class ProfileActivity extends AppCompatActivity implements ProfileFragmen
     private FragmentTransaction ft;
     private UploadTask uploadTask;
     private StorageReference storageRef;
-    private DatabaseReference customerInfoRef;
-    private FirebaseDatabase database;
-    private DriverModel currentCustomer;
+    private DriverModel driverModel;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+
+        driverModel=((DriverClient)getApplicationContext()).getDriver();
+
         ft = getSupportFragmentManager().beginTransaction();
         ft.setCustomAnimations(
                 R.anim.slide_in,  // enter
@@ -76,7 +78,6 @@ public class ProfileActivity extends AppCompatActivity implements ProfileFragmen
         user = FirebaseAuth.getInstance().getCurrentUser();
         editText=findViewById(R.id.input);
 
-        currentCustomer = new DriverModel("firstName", "lastName", "phoneNumber", "email", "city");
 
 
 
@@ -91,7 +92,7 @@ public class ProfileActivity extends AppCompatActivity implements ProfileFragmen
         switch (v.getId()){
             case R.id.fname:
 
-        EditProfileFragment fragment=EditProfileFragment.newInstance(getResources().getString(R.string.fname_label),currentCustomer.getFirstName(),this);
+        EditProfileFragment fragment=EditProfileFragment.newInstance(getResources().getString(R.string.fname_label),driverModel.getFirstName(),this);
         fragment.setEditListener(this);
 
                 ft.replace(R.id.fragment_placeholder,  fragment)
@@ -100,19 +101,19 @@ public class ProfileActivity extends AppCompatActivity implements ProfileFragmen
                 break;
             case R.id.surname:
                 //   EditProfileFragment.newInstance("@string/fname_label",currentCustomer.getFirstName());
-                ft.replace(R.id.fragment_placeholder,  EditProfileFragment.newInstance(getResources().getString(R.string.surname_label),currentCustomer.getLastName(),this))
+                ft.replace(R.id.fragment_placeholder,  EditProfileFragment.newInstance(getResources().getString(R.string.surname_label),driverModel.getLastName(),this))
                         .addToBackStack(null);
 
                 ft.commit();
                 break;
             case R.id.phone_layout:
                 //   EditProfileFragment.newInstance("@string/fname_label",currentCustomer.getFirstName());
-                ft.replace(R.id.fragment_placeholder,  EditProfileFragment.newInstance(getResources().getString(R.string.phone_label),currentCustomer.getPhoneNumber(),this)).addToBackStack(null);
+                ft.replace(R.id.fragment_placeholder,  EditProfileFragment.newInstance(getResources().getString(R.string.phone_label),driverModel.getPhoneNumber(),this)).addToBackStack(null);
                 ft.commit();
                 break;
             case R.id.email:
                 //   EditProfileFragment.newInstance("@string/fname_label",currentCustomer.getFirstName());
-                ft.replace(R.id.fragment_placeholder,  EditProfileFragment.newInstance(getResources().getString(R.string.email_label),currentCustomer.getEmail(),this)).addToBackStack(null);
+                ft.replace(R.id.fragment_placeholder,  EditProfileFragment.newInstance(getResources().getString(R.string.email_label),driverModel.getEmail(),this)).addToBackStack(null);
                 ft.commit();
                 break;
             case R.id.user_image:
@@ -155,8 +156,6 @@ public class ProfileActivity extends AppCompatActivity implements ProfileFragmen
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         storageRef = storage.getReference();
-        database = FirebaseDatabase.getInstance("https://dropex-c78c1-default-rtdb.firebaseio.com/");
-//        customerInfoRef = database.getReference(Common.CUSTOMER_INFO_REFERENCE);
         if (resultCode != RESULT_CANCELED) {
 
             switch (requestCode) {
@@ -192,25 +191,14 @@ public class ProfileActivity extends AppCompatActivity implements ProfileFragmen
                                     public void onSuccess(Uri uri) {
                                         Map<String, Object> hopperUpdates = new HashMap<>();
                                         hopperUpdates.put("userImageUrl",uri.toString());
-                                        customerInfoRef.child(user.getUid()).updateChildren(hopperUpdates);
-//                                        currentCustomer.setUserImageUrl(uri.toString());
+                                        Common.getDriverReference().child(user.getUid()).updateChildren(hopperUpdates);
+//
 
 
                                     }
                                 });
 
-                              //  Log.e("download link",downloadUrl.getResult().getPath());
-                              /*  customerInfoRef.child(user.getUid()).setValue(currentCustomer)
-                                        .addOnFailureListener(e -> {
-                                            Log.e("updating error",e.toString());
-                                        }).addOnSuccessListener(aVoid -> {
-                                    Log.e("success uploading","done");
 
-
-
-                                });
-
-                               */
                             }
                         });
                     }
@@ -233,37 +221,20 @@ public class ProfileActivity extends AppCompatActivity implements ProfileFragmen
                         uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                             @Override
                             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
-                                // ...
-                              /*  final Task<Uri> downloadUrl = taskSnapshot.getStorage().getDownloadUrl();
-                                currentCustomer.setUserImageUrl(downloadUrl.getResult().getPath());
-                                customerInfoRef.child(user.getUid()).setValue(currentCustomer)
-                                        .addOnFailureListener(e -> {
-                                            Log.e("updating error",e.toString());
-                                        }).addOnSuccessListener(aVoid -> {
-                                    Log.e("success uploading","done");
 
-
-
-                                });
-
-                               */
 
                                 riversRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                     @Override
                                     public void onSuccess(Uri uri) {
                                         Map<String, Object> hopperUpdates = new HashMap<>();
                                         hopperUpdates.put("userImageUrl",uri.toString());
-                                        customerInfoRef.child(user.getUid()).updateChildren(hopperUpdates);
-//                                        currentCustomer.setUserImageUrl(uri.toString());
+                                        Common.getDriverReference().child(user.getUid()).updateChildren(hopperUpdates);
+//
 
                                     }
                                 });
 
 
-
-
-                            //   currentCustomer.updateCustomerInfo();
                             }
                         });
 
@@ -276,10 +247,9 @@ public class ProfileActivity extends AppCompatActivity implements ProfileFragmen
     @Override
     public void onClickSave(String field,String value) {
         if(field== getResources().getString(R.string.fname_label)){
-            database = FirebaseDatabase.getInstance("https://dropex-c78c1-default-rtdb.firebaseio.com/");
-//            customerInfoRef = database.getReference(Common.CUSTOMER_INFO_REFERENCE);
-            currentCustomer.setFirstName(value);
-            customerInfoRef.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(currentCustomer)
+
+            driverModel.setFirstName(value);
+            Common.getDriverReference().child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(driverModel)
                     .addOnFailureListener(e -> {
 
                         Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -290,10 +260,9 @@ public class ProfileActivity extends AppCompatActivity implements ProfileFragmen
             });
         }
         else if(field == getResources().getString(R.string.surname_label)){
-            FirebaseDatabase database = FirebaseDatabase.getInstance("https://dropex-c78c1-default-rtdb.firebaseio.com/");
-//            DatabaseReference customerInfoRef = database.getReference(Common.CUSTOMER_INFO_REFERENCE);
-            currentCustomer.setLastName(value);
-            customerInfoRef.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(currentCustomer)
+
+            driverModel.setLastName(value);
+            Common.getDriverReference().child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(driverModel)
                     .addOnFailureListener(e -> {
 
                         Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -304,37 +273,15 @@ public class ProfileActivity extends AppCompatActivity implements ProfileFragmen
             });
         }
         else if(field == getResources().getString(R.string.email_label)){
-            FirebaseDatabase database = FirebaseDatabase.getInstance("https://dropex-c78c1-default-rtdb.firebaseio.com/");
-//            DatabaseReference customerInfoRef = database.getReference(Common.CUSTOMER_INFO_REFERENCE);
-            currentCustomer.setEmail(value);
-            user.sendEmailVerification();
-            customerInfoRef.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(currentCustomer)
+
+            driverModel.setEmail(value);
+
+            Common.getDriverReference().child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(driverModel)
                     .addOnFailureListener(e -> {
 
                         Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
                     }).addOnSuccessListener(aVoid -> {
-                FirebaseAuth mAuth = FirebaseAuth.getInstance();
-                mAuth.signInAnonymously()
-                        .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                if (task.isSuccessful()) {
-                                    Log.d(TAG, "signInAnonymously:success");
-                                    if (mAuth.getCurrentUser().isEmailVerified() == false) {
-                                        mAuth.getCurrentUser().updateEmail(currentCustomer.getEmail());
-                                        mAuth.getCurrentUser().sendEmailVerification();
-                                        Log.e(TAG, "mail sent.....................................");
-                                    }
-
-                                    //updateUI(user);
-                                } else {
-                                    // If sign in fails, display a message to the user.
-                                    Log.w(TAG, "signInAnonymously:failure", task.getException());
-                                    Toast.makeText(getApplicationContext(), "Authentication failed.",
-                                            Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        });
+                user.sendEmailVerification();
                 Toast.makeText(this, "updated successfully", Toast.LENGTH_SHORT).show();
 
 

@@ -19,6 +19,7 @@ import com.example.dropex.Model.CustomerModel;
 import com.example.dropex.NavigationLauncherActivity;
 import com.example.dropex.R;
 import com.example.dropex.SharedPref;
+import com.example.dropex.UserClient;
 import com.example.dropex.ui.home.HomeActivity;
 import com.example.dropex.ui.shipments.main.CallToActionActivity;
 import com.firebase.ui.auth.AuthUI;
@@ -163,8 +164,9 @@ public class SplashScreenActivity extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
                             CustomerModel customerModel = dataSnapshot.getValue(CustomerModel.class);
+                            ((UserClient)getApplicationContext()).setCustomer(customerModel);
 
-                            goToHomeActivity(customerModel);
+                            goToHomeActivity();
                         } else {
                             showRegisterLayout();
                         }
@@ -190,8 +192,8 @@ public class SplashScreenActivity extends AppCompatActivity {
 
     }
 
-    private void goToHomeActivity(CustomerModel customerModel) {
-        Common.currentCustomer = customerModel;
+    private void goToHomeActivity() {
+
         startActivity(new Intent(SplashScreenActivity.this, NavigationLauncherActivity.class));
         overridePendingTransition(R.anim.fade_in,R.anim.fade_out);
         finish();

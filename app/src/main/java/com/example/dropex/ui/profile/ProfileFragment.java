@@ -15,12 +15,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.dropex.Model.CustomerModel;
 import com.example.dropex.R;
+import com.example.dropex.UserClient;
 import com.google.firebase.auth.FirebaseAuth;
 
 import org.jetbrains.annotations.NotNull;
 
-import static com.example.dropex.Common.Common.currentCustomer;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -40,6 +42,7 @@ public class ProfileFragment extends Fragment{
     ImageView user_avatar;
 
     private OnProfileListener onProfileListener;
+    private CustomerModel currentCustomer;
 
     public void setOnProfileListener(OnProfileListener onProfileListener) {
         this.onProfileListener = onProfileListener;
@@ -61,6 +64,7 @@ public class ProfileFragment extends Fragment{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        currentCustomer=((UserClient)getActivity().getApplicationContext()).getCustomer();
 
     }
 

@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+
 import com.google.firebase.firestore.ServerTimestamp;
 import com.google.gson.JsonObject;
 import com.graphhopper.directions.api.client.JSON;
@@ -18,6 +19,7 @@ import com.graphhopper.directions.api.client.model.Address;
 import com.graphhopper.directions.api.client.model.GeocodingLocation;
 import com.graphhopper.directions.api.client.model.Service;
 import com.graphhopper.directions.api.client.model.Shipment;
+import com.graphhopper.directions.api.client.model.Solution;
 import com.graphhopper.directions.api.client.model.Stop;
 import com.graphhopper.directions.api.client.model.Vehicle;
 
@@ -37,7 +39,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
-import static com.example.dropex.Common.Common.currentCustomer;
 
 public class Job {
 
@@ -48,17 +49,25 @@ public class Job {
     private GeocodingLocation pickUpLocation;
     private boolean hasBeenFulfilled=false;
     private int cost;
-    public JobSolution solution;
+    public Solution solution;
 
     @ServerTimestamp
-    Date time;
+    public Date time;
 
 
-    public JobSolution getSolution() {
+    public Date getTime() {
+        return time;
+    }
+
+    public void setTime(Date time) {
+        this.time = time;
+    }
+
+    public Solution getSolution() {
         return solution;
     }
 
-    public void setSolution(JobSolution solution) {
+    public void setSolution(Solution solution) {
         this.solution = solution;
     }
 

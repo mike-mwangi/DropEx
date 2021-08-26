@@ -59,7 +59,6 @@ import retrofit2.Call;
 import retrofit2.Response;
 import timber.log.Timber;
 
-import static com.example.dropex.Common.Common.currentCustomer;
 
 
 public class ShippingItemFragment extends Fragment implements FetchGeocodingTaskCallbackInterface, AutoCompleteAdapter.OnItemClickListener{
@@ -134,7 +133,7 @@ public class ShippingItemFragment extends Fragment implements FetchGeocodingTask
       autoCompleteAdapter1.setOnItemClickListener(this);
 
         ImageButton searchButton=view.findViewById(R.id.search_btn);
-locationInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+    locationInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
         if(hasFocus){

@@ -23,7 +23,9 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.example.dropex.Common.Common;
+import com.example.dropex.Model.CustomerModel;
 import com.example.dropex.R;
+import com.example.dropex.UserClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -44,7 +46,6 @@ import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.example.dropex.Common.Common.currentCustomer;
 
 // TODO: implement the CRUD functionality
 
@@ -61,13 +62,15 @@ public class ProfileActivity extends AppCompatActivity implements ProfileFragmen
     private StorageReference storageRef;
     private DatabaseReference customerInfoRef;
     private FirebaseDatabase database;
+    private CustomerModel currentCustomer;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+
+        currentCustomer=((UserClient)getApplicationContext()).getCustomer();
         ft = getSupportFragmentManager().beginTransaction();
         ft.setCustomAnimations(
                 R.anim.slide_in,  // enter
@@ -347,5 +350,6 @@ public class ProfileActivity extends AppCompatActivity implements ProfileFragmen
 
             });
         }
+        ((UserClient)getApplicationContext()).setCustomer(currentCustomer);
     }
 }

@@ -1,15 +1,15 @@
-package com.example.driverapplication;
+package com.example.driverapplication.ApiDataFetchers.Solution;
 
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.example.driverapplication.Model.JobSolution;
+import com.example.driverapplication.FetchSolutionTaskCallbackInterface;
+import com.example.driverapplication.R;
 import com.graphhopper.directions.api.client.ApiException;
 import com.graphhopper.directions.api.client.api.SolutionApi;
 import com.graphhopper.directions.api.client.model.Activity;
 import com.graphhopper.directions.api.client.model.Address;
 import com.graphhopper.directions.api.client.model.Route;
-import com.graphhopper.directions.api.client.model.Solution;
 import com.mapbox.geojson.Point;
 
 import java.util.ArrayList;
@@ -17,36 +17,29 @@ import java.util.List;
 
 import timber.log.Timber;
 
-public class FetchSolutionTaskButReturnJobSolution extends AsyncTask<FetchSolutionConfig, Void, JobSolution> {
+public class FetchSolutionTask extends AsyncTask<FetchSolutionConfig, Void, List<Point>> {
 
     private final String ghKey;
-    private final FetchSolutionCallBackInterfaceButWithJobSolution callbackInterface;
+    private final FetchSolutionTaskCallbackInterface callbackInterface;
 
-    public FetchSolutionTaskButReturnJobSolution(FetchSolutionCallBackInterfaceButWithJobSolution callbackInterface, String ghKey) {
+    public FetchSolutionTask(FetchSolutionTaskCallbackInterface callbackInterface, String ghKey) {
         this.callbackInterface = callbackInterface;
         this.ghKey = ghKey;
     }
 
     @Override
-    protected JobSolution doInBackground(FetchSolutionConfig... solutions) {
+    protected List<Point> doInBackground(FetchSolutionConfig... solutions) {
 
         if (solutions.length != 1)
             throw new IllegalArgumentException("It's only possible to fetch one solution at a time");
 
         List<Point> points = new ArrayList<>();
         SolutionApi api = new SolutionApi();
-        JobSolution jobSolution=new JobSolution();
 
         try {
             com.graphhopper.directions.api.client.model.Response res = api.getSolution(ghKey, solutions[0].jobId);
             Log.e("FETCHSOLUTIONTASK",solutions[0].jobId);
             List<Route> routes = res.getSolution().getRoutes();
-            final Solution solution = res.getSolution();
-            jobSolution.setNoVehicles(solution.getNoVehicles());
-            jobSolution.setCosts(solution.getCosts());
-            jobSolution.setTime(solution.getTime());
-            jobSolution.setCompletionTime(solution.getCompletionTime());
-            jobSolution.setDistance(solution.getDistance());
 
             for (Route route : routes) {
                 if (route.getVehicleId().equals(solutions[0].vehicleId) || solutions[0].vehicleId == null) {
@@ -63,22 +56,19 @@ public class FetchSolutionTaskButReturnJobSolution extends AsyncTask<FetchSoluti
                 }
             }
 
-            if (points.isEmpty()) {
+            if (points.isEmpty())
                 callbackInterface.onError(R.string.error_vehicle_not_found);
-            }
-            else {
-                jobSolution.setPoints(points);
-            }
+
         } catch (ApiException e) {
             callbackInterface.onError(R.string.error_fetching_solution);
             Timber.e(e, "An exception occured when fetching a solution with jobId %s", solutions[0].jobId);
         }
 
-        return jobSolution;
+        return points;
     }
 
     @Override
-    protected void onPostExecute(JobSolution jobSolution) {
-        callbackInterface.onPostExecute(jobSolution);
+    protected void onPostExecute(List<Point> points) {
+        callbackInterface.onPostExecute(points);
     }
 }

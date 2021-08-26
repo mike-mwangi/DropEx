@@ -13,6 +13,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
+import com.example.driverapplication.DriverClient;
+import com.example.driverapplication.Model.DriverModel;
 import com.example.driverapplication.R;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -36,6 +38,7 @@ public class ProfileFragment extends Fragment{
     ImageView user_avatar;
 
     private OnProfileListener onProfileListener;
+    private DriverModel driverModel;
 
     public void setOnProfileListener(OnProfileListener onProfileListener) {
         this.onProfileListener = onProfileListener;
@@ -57,12 +60,13 @@ public class ProfileFragment extends Fragment{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        driverModel=((DriverClient)getActivity().getApplicationContext()).getDriver();
     }
 
     @Override
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
         user_avatar=view.findViewById(R.id.user_image);
         fname=view.findViewById(R.id.fname);
         surname=view.findViewById(R.id.surname);
@@ -73,16 +77,17 @@ public class ProfileFragment extends Fragment{
         phone_text=view.findViewById(R.id.text_phone);
         fname_text=view.findViewById(R.id.text_fname);
         surname_text=view.findViewById(R.id.text_surname);
+        email_text.setText(driverModel.getEmail());
+        phone_text.setText(driverModel.getPhoneNumber());
+        fname_text.setText(driverModel.getFirstName());
+        surname_text.setText(driverModel.getLastName());
 
-//        email_text.setText(currentCustomer.getEmail());
-//        phone_text.setText(currentCustomer.getPhoneNumber());
-//        fname_text.setText(currentCustomer.getFirstName());
-//        surname_text.setText(currentCustomer.getLastName());
-//
-//        Glide
-//                .with(getContext())
-//                .load(currentCustomer.getUserImageUrl())
-//                .into(user_avatar);
+
+       Glide
+
+              .with(getContext())
+              .load(driverModel.getUserImageUrl())
+               .into(user_avatar);
 
 
 

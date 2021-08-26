@@ -19,8 +19,11 @@ import android.widget.ImageButton;
 import com.example.dropex.FetchGeocodingConfig;
 import com.example.dropex.FetchGeocodingTask;
 import com.example.dropex.FetchGeocodingTaskCallbackInterface;
+import com.example.dropex.Model.CustomerModel;
 import com.example.dropex.Model.Job;
 import com.example.dropex.R;
+import com.example.dropex.UserClient;
+import com.firebase.ui.auth.data.model.User;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.graphhopper.directions.api.client.model.GeocodingLocation;
@@ -30,7 +33,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.dropex.Common.Common.currentCustomer;
+
 
 public class JobInformationFragment extends Fragment implements FetchGeocodingTaskCallbackInterface,AutoCompleteAdapter.OnItemClickListener{
 
@@ -40,6 +43,7 @@ public class JobInformationFragment extends Fragment implements FetchGeocodingTa
     private AutoCompleteAdapter autoCompleteAdapter1;
     private MaterialButton next;
     private GeocodingLocation pickupLocation;
+    private CustomerModel currentCustomer;
 
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -63,6 +67,7 @@ public class JobInformationFragment extends Fragment implements FetchGeocodingTa
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        currentCustomer=((UserClient)getActivity().getApplicationContext()).getCustomer();
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -117,6 +122,7 @@ public class JobInformationFragment extends Fragment implements FetchGeocodingTa
                 action.setNumberOfShipments(quantity);
                 currentCustomer.setCurrentJob(new Job());
                 currentCustomer.getCurrentJob().setPickUpLocation(pickupLocation);
+                ((UserClient)getActivity().getApplicationContext()).setCustomer(currentCustomer);
                 Navigation.findNavController(view).navigate(action);
             }
         });

@@ -1,4 +1,4 @@
-package com.example.driverapplication;
+package com.example.driverapplication.ApiDataFetchers.GeoCoding;
 
 public class FetchGeocodingConfig {
 
