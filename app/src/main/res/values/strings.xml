@@ -155,5 +155,10 @@
     <string name="delete">Delete</string>
     <string name="label_job">Job</string>
     <string name="saveAndEstimate">Save and estimate price</string>
+    <string name="tracking_code">Tracking Code</string>
+    <string name="explain_receive_package">Track the location of your parcel and connect to your deliverer</string>
+    <string name="recieve_package">Recieve a package</string>
+    <string name="receive_package">Receive a package</string>
+    <string name="track">Track</string>
 
 </resources>

@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import okhttp3.Callback;
 
@@ -181,6 +182,9 @@ public String TAG=this.getTag();
                         flagIncompleteForms.add(i);
                     }
                     else {
+                        fragment.getService().setItemDeliveryVerificationCode(generateVerificationCode());
+                        fragment.getService().setStatus("NOT-DELIVERED");
+                        fragment.getService().setDelivered(false);
                         services.add(fragment.getService());
                     }
                 }
@@ -293,5 +297,20 @@ public String TAG=this.getTag();
          */
 
 
+    }
+    public String generateVerificationCode() {
+        int leftLimit = 48; // numeral '0'
+        int rightLimit = 122; // letter 'z'
+        int targetStringLength = 10;
+        Random random = new Random();
+
+        String generatedString = random.ints(leftLimit, rightLimit + 1)
+                .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+                .limit(targetStringLength)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
+
+        System.out.println(generatedString);
+        return generatedString;
     }
 }

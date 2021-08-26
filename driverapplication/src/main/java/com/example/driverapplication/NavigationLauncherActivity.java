@@ -43,18 +43,24 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.bumptech.glide.Glide;
 import com.example.driverapplication.Model.DriverModel;
+import com.example.driverapplication.Model.Job;
+import com.example.driverapplication.Model.JobSolution;
 import com.example.driverapplication.NavigationViewSettingsActivity;
 import com.example.driverapplication.R;
 import com.example.driverapplication.Service.TrackingService;
 import com.example.driverapplication.ui.profile.ProfileActivity;
 import com.example.driverapplication.ui.profile.main.WelcomeActivity;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.messaging.FirebaseMessaging;
+
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.graphhopper.directions.api.client.model.GeocodingLocation;
 import com.graphhopper.directions.api.client.model.GeocodingPoint;
 import com.graphhopper.directions.api.client.model.RoutePoint;
@@ -157,6 +163,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     private ConstraintLayout bottomSheet;
     private MaterialButton startWork;
     private LayoutInflater inflater;
+    private Job job;
 
     private DriverModel driverModel;
     private LocationListener locationListener;
@@ -302,6 +309,26 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     private void handleIntent(Intent intent) {
         if (intent != null) {
             Uri data = intent.getData();
+
+            if(intent.getStringExtra("JOBID")!=null) {
+                final String jobid = intent.getStringExtra("JOBID");
+                final Task<DocumentSnapshot> getJobSnapshot = FirebaseFirestore.getInstance().collection("users").document(intent.getStringExtra("userID")).collection("jobs").document(jobid).get();
+                getJobSnapshot.addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        job = documentSnapshot.toObject(Job.class);
+                        List<Point> points = JobSolution.gePoints(job.getSolution().getRoutes());
+                        if (getStartFromLocationFromSharedPreferences() && !points.isEmpty()) {
+                            // Remove the first point if we want to start from the current location
+
+                        }
+
+
+                        updateWaypoints(points);
+
+                    }
+                });
+            }
 
         }
     }
@@ -937,8 +964,6 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     }
 
     public void startWork(View view) {
-
-        FirebaseMessaging.getInstance().subscribeToTopic(driverModel.getVehicle().getCustomVehicleType().getProfile().getValue());
 
     }
 }
