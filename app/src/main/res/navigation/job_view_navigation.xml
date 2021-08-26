@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/job_view_navigation"
+    app:startDestination="@id/jobFragment">
+
+
+    <fragment
+        android:id="@+id/jobFragment"
+        android:name="com.example.dropex.ui.job.JobFragment"
+        android:label="fragment_job"
+        tools:layout="@layout/fragment_job" >
+        <action
+            android:id="@+id/action_jobFragment_to_jobViewFragment"
+            app:destination="@id/jobViewFragment" />
+        <action
+            android:id="@+id/action_jobFragment_to_callToActionActivity"
+            app:destination="@id/callToActionActivity" />
+    </fragment>
+    <fragment
+        android:id="@+id/jobViewFragment"
+        android:name="com.example.dropex.ui.job.JobViewFragment"
+        android:label="fragment_job_view"
+        tools:layout="@layout/fragment_job_view" />
+    <activity
+        android:id="@+id/callToActionActivity"
+        android:name="com.example.dropex.ui.shipments.main.CallToActionActivity"
+        android:label="CallToActionActivity" />
+</navigation>

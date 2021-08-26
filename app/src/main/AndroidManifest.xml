@@ -59,6 +59,13 @@
         <activity android:name=".ui.shipments.main.CallToActionActivity" />
         <activity android:name=".ui.home.HomeActivity"></activity>
         <activity android:name=".NavigationLauncherActivity"></activity>
+        <service
+            android:name=".Service.MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

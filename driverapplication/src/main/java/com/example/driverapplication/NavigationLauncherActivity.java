@@ -45,13 +45,16 @@ import com.bumptech.glide.Glide;
 import com.example.driverapplication.Model.DriverModel;
 import com.example.driverapplication.NavigationViewSettingsActivity;
 import com.example.driverapplication.R;
+import com.example.driverapplication.Service.TrackingService;
 import com.example.driverapplication.ui.profile.ProfileActivity;
 import com.example.driverapplication.ui.profile.main.WelcomeActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.graphhopper.directions.api.client.model.GeocodingLocation;
 import com.graphhopper.directions.api.client.model.GeocodingPoint;
 import com.graphhopper.directions.api.client.model.RoutePoint;
@@ -152,6 +155,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     private TextView capacityTruckTextView;
     private TextView capacityCarTextView;
     private ConstraintLayout bottomSheet;
+    private MaterialButton startWork;
     private LayoutInflater inflater;
 
     private DriverModel driverModel;
@@ -170,17 +174,19 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         // ButterKnife.bind(this);
 
         bottomSheet = findViewById(R.id.bottom_sheet_behavior_id);
-        bikePriceTextView = bottomSheet.findViewById(R.id.number_of_bikes);
-        carPriceTextView = bottomSheet.findViewById(R.id.number_of_cars);
-        truckPriceTextView = bottomSheet.findViewById(R.id.number_of_trucks);
-        capacityBikeTextView= bottomSheet.findViewById(R.id.explain_why_bikes);
-        capacityCarTextView= bottomSheet.findViewById(R.id.explain_why_cars);
-        capacityTruckTextView= bottomSheet.findViewById(R.id.explain_why_trucks);
-
-
+        startWork=bottomSheet.findViewById(R.id.start_work_btn);
         BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
 
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        bottomSheetBehavior.setDraggable(false);
+        startWork.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        startService(new Intent(NavigationLauncherActivity.this, TrackingService.class));
+                    }
+                }
+        );
 
         mapView=findViewById(R.id.mapView);
         loading=findViewById(R.id.loading);
@@ -209,15 +215,6 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         init();
         showFirstStartIfNecessary();
     }
-    private void setVehiclePrices(Integer cost){
-        int bikePrice=cost*2;
-        bikePriceTextView.setText(String.valueOf(bikePrice)+" Kshs");
-        carPriceTextView.setText(String.valueOf(cost*2.7)+" Kshs");
-        truckPriceTextView.setText(String.valueOf(cost*3)+" Kshs");
-        capacityBikeTextView.setText("capacity < 5kg");
-        capacityCarTextView.setText("capacity < 200kg");
-        capacityTruckTextView.setText("capacity < 1000kg");
-    }
 
     private void init() {
         navigationView.setNavigationItemSelectedListener(item -> {
@@ -241,6 +238,10 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
             }
             else if(item.getItemId() == R.id.nav_home){
       //          startActivity(new Intent(this, JobsActivity.class));
+
+            }
+            else if(item.getItemId() == R.id.nav_work_mode){
+                startService(new Intent(this, TrackingService.class));
 
             }
 
@@ -933,5 +934,11 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         super.onNewIntent(intent);
         // getIntent() should always return the most recent
         setIntent(intent);
+    }
+
+    public void startWork(View view) {
+
+        FirebaseMessaging.getInstance().subscribeToTopic(driverModel.getVehicle().getCustomVehicleType().getProfile().getValue());
+
     }
 }

@@ -83,6 +83,7 @@ public String TAG=this.getTag();
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private Job job;
 
 
     public static ShippingInformationFragment newInstance(String param1, String param2) {
@@ -216,7 +217,7 @@ public String TAG=this.getTag();
                                         Log.e("Shippin",e.toString());
                                     }
                                 });
-                                Job job=currentCustomer.getCurrentJob();
+                                job = currentCustomer.getCurrentJob();
                                // new FetchSolutionTaskButReturnJobSolution(ShippingInformationFragment.this,getString(R.string.gh_key)).execute(new FetchSolutionConfig(job.getJobID(), "default"));
 
 
@@ -271,6 +272,7 @@ public String TAG=this.getTag();
             @Override
             public void onSuccess(Void unused) {
                 Intent goToNavLauncher=new Intent(ShippingInformationFragment.this.getActivity(), NavigationLauncherActivity.class);
+                goToNavLauncher.putExtra("JOBID",job.getJobID());
                 startActivity(goToNavLauncher);
 
             }

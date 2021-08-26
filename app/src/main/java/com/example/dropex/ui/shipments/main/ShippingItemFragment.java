@@ -133,7 +133,7 @@ public class ShippingItemFragment extends Fragment implements FetchGeocodingTask
       autoCompleteAdapter1.setOnItemClickListener(this);
 
         ImageButton searchButton=view.findViewById(R.id.search_btn);
-locationInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+    locationInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
         if(hasFocus){

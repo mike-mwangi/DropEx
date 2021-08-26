@@ -60,7 +60,7 @@
     </style>
     <style name="ShapeAppearanceOverlay.MyTheme.RoundComponent" parent="ShapeAppearance.MaterialComponents.MediumComponent">
 
-        <item name="cornerSizeBottomLeft">32dp</item>
+        <item name="cornerSize">50dp</item>
         <item name="cornerFamily">rounded</item>
 
     </style>

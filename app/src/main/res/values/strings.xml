@@ -152,5 +152,8 @@
     <string name="menu_jobs">Jobs</string>
     <string name="pickup_address">Pickup address</string>
     <string name="mot_information">Means Of Transport</string>
+    <string name="delete">Delete</string>
+    <string name="label_job">Job</string>
+    <string name="saveAndEstimate">Save and estimate price</string>
 
 </resources>

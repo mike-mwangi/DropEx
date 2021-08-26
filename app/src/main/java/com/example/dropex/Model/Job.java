@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+
 import com.google.firebase.firestore.ServerTimestamp;
 import com.google.gson.JsonObject;
 import com.graphhopper.directions.api.client.JSON;
@@ -51,8 +52,16 @@ public class Job {
     public Solution solution;
 
     @ServerTimestamp
-    Date time;
+    public Date time;
 
+
+    public Date getTime() {
+        return time;
+    }
+
+    public void setTime(Date time) {
+        this.time = time;
+    }
 
     public Solution getSolution() {
         return solution;

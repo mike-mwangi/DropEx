@@ -46,17 +46,36 @@ import com.example.dropex.Common.Common;
 import com.example.dropex.Model.CustomerModel;
 import com.example.dropex.Model.Job;
 import com.example.dropex.Model.JobSolution;
+import com.example.dropex.Model.LocationTrackingModel;
 import com.example.dropex.ui.home.HomeActivity;
 import com.example.dropex.ui.job.JobsActivity;
 import com.example.dropex.ui.main.SplashScreenActivity;
 import com.example.dropex.ui.profile.ProfileActivity;
 import com.example.dropex.ui.shipments.main.CallToActionActivity;
 import com.example.dropex.utils.AppExecutor;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingService;
+import com.google.firebase.messaging.RemoteMessage;
+
 import com.graphhopper.directions.api.client.model.GeocodingLocation;
 import com.graphhopper.directions.api.client.model.GeocodingPoint;
 import com.graphhopper.directions.api.client.model.RoutePoint;
@@ -115,8 +134,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 
-public class NavigationLauncherActivity extends AppCompatActivity implements OnMapReadyCallback,
-        MapboxMap.OnMapLongClickListener, OnRouteSelectionChangeListener,
+public class NavigationLauncherActivity extends AppCompatActivity implements OnMapReadyCallback, OnRouteSelectionChangeListener,
         FetchSolutionCallBackInterfaceButWithJobSolution,
         PermissionsListener {
 
@@ -132,6 +150,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     private MapboxMap mapboxMap;
     private PermissionsManager permissionsManager;
     private static AppExecutor appExecutor=new AppExecutor();
+    private ArrayList<LocationTrackingModel> locationTrackingModelArrayList=new ArrayList<>();
 
 
 
@@ -164,9 +183,14 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     private TextView capacityBikeTextView;
     private TextView capacityTruckTextView;
     private TextView capacityCarTextView;
+    private MaterialCardView vans;
+    private MaterialCardView cars;
+    private MaterialCardView bikes;
+
     private ConstraintLayout bottomSheet;
     private LayoutInflater inflater;
     private CustomerModel customer;
+    private Job job;
 
 
     @Override
@@ -188,6 +212,10 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         capacityBikeTextView= bottomSheet.findViewById(R.id.explain_why_bikes);
         capacityCarTextView= bottomSheet.findViewById(R.id.explain_why_cars);
         capacityTruckTextView= bottomSheet.findViewById(R.id.explain_why_trucks);
+        bikes=bottomSheet.findViewById(R.id.bikes);
+        vans=bottomSheet.findViewById(R.id.trucks);
+        cars=bottomSheet.findViewById(R.id.cars);
+        setOnClickListenerForCards();
 
 
         BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
@@ -228,6 +256,17 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         init();
         showFirstStartIfNecessary();
     }
+    private void setOnClickListenerForCards(){
+        // TODO: implement messaging
+        bikes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Bundle messageBundle=new Bundle();
+                messageBundle.putString("jobID",job.getJobID());
+
+            }
+        });
+    }
     private void setVehiclePrices(Integer cost){
         int bikePrice=cost*2;
         bikePriceTextView.setText(String.valueOf(bikePrice)+" Kshs");
@@ -237,6 +276,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         capacityCarTextView.setText("capacity < 200kg");
         capacityTruckTextView.setText("capacity < 1000kg");
     }
+
 
     private void init() {
         navigationView.setNavigationItemSelectedListener(item -> {
@@ -267,20 +307,34 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
 
             return true;
         });
-
-        //Populate user data
         View headerView = navigationView.getHeaderView(0);
         TextView text_name = (TextView)headerView.findViewById(R.id.text_name);
+        FirebaseDatabase.getInstance().getReference("Customers").child(FirebaseAuth.getInstance().getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+                ((UserClient)NavigationLauncherActivity.this.getApplicationContext()).setCustomer(snapshot.getValue(CustomerModel.class));
+                final CustomerModel customer = snapshot.getValue(CustomerModel.class);
+
+                img_avatar = (ImageView)headerView.findViewById(R.id.user_avatar);
+                Glide
+                        .with(NavigationLauncherActivity.this)
+                        .load(customer.getUserImageUrl())
+                        .into(img_avatar);
 
 
-        img_avatar = (ImageView)headerView.findViewById(R.id.user_avatar);
-        Glide
-                .with(this)
-                .load(customer.getUserImageUrl())
-                .into(img_avatar);
+                text_name.setText(customer.getFirstName()+" "+ customer.getLastName());
+            }
+
+            @Override
+            public void onCancelled(@NonNull @NotNull DatabaseError error) {
+
+            }
+        });
+
+        //Populate user data
 
 
-        text_name.setText(customer.getFirstName()+" "+ customer.getLastName());
+
 
 
     }
@@ -326,16 +380,18 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     protected void onStart() {
         super.onStart();
         mapView.onStart();
+        customer = ((UserClient)getApplicationContext()).getCustomer();
         if (locationLayer != null) {
             locationLayer.onStart();
         }
+
     }
 
 
 
     private void handleIntent(Intent intent) {
         if (intent != null) {
-            Uri data = intent.getData();
+         /*   Uri data = intent.getData();
             if (data != null && "graphhopper.com".equals(data.getHost())) {
                 if (data.getPath() != null) {
                     if (this.mapboxMap == null) {
@@ -367,6 +423,29 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
                 }
 
             }
+
+
+              */
+            if(intent.getStringExtra("JOBID")!=null) {
+                final String jobid = intent.getStringExtra("JOBID");
+                final Task<DocumentSnapshot> getJobSnapshot = FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid()).collection("jobs").document(jobid).get();
+                getJobSnapshot.addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        job = documentSnapshot.toObject(Job.class);
+                        List<Point> points = JobSolution.gePoints(job.getSolution().getRoutes());
+                        if (getStartFromLocationFromSharedPreferences() && !points.isEmpty()) {
+                            // Remove the first point if we want to start from the current location
+
+                        }
+
+                        setVehiclePrices(job.getSolution().getCosts());
+                        updateWaypoints(points);
+
+                    }
+                });
+            }
+
         }
     }
 
@@ -450,18 +529,19 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     public void onMapReady(MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
         this.mapboxMap.getUiSettings().setAttributionDialogManager(new GHAttributionDialogManager(this.mapView.getContext(), this.mapboxMap));
-        this.mapboxMap.addOnMapLongClickListener(this);
         this.mapboxMap.setOnMarkerClickListener(new MapboxMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(@NonNull @NotNull Marker marker) {
                 long id=marker.getId();
                 final String title = marker.getTitle();
-                View childLayout = inflater.inflate(R.layout.fragment_shipping_item, bottomSheet);
-                BottomSheetHandler.showShipment(title,bottomSheet);
+               // View childLayout = inflater.inflate(R.layout.fragment_shipping_item, bottomSheet);
+                //BottomSheetHandler.showShipment(title,bottomSheet);
                 return false;
             }
         });
         initMapRoute();
+fetchLocationUpdates();
+
 
         this.mapboxMap.setOnInfoWindowClickListener(new MapboxMap.OnInfoWindowClickListener() {
             @Override
@@ -489,13 +569,46 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
 
         handleIntent(getIntent());
     }
+    private ArrayList<LocationTrackingModel> fetchLocationUpdates() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference ref = db.collection("driverLocation");
+        ref.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable @org.jetbrains.annotations.Nullable QuerySnapshot value, @Nullable @org.jetbrains.annotations.Nullable FirebaseFirestoreException error) {
+                List<LocationTrackingModel> types = value.toObjects(LocationTrackingModel.class);
+                locationTrackingModelArrayList.addAll(types);
+                for (LocationTrackingModel vehicle : locationTrackingModelArrayList) {
+                    MarkerOptions markerOptions = new MarkerOptions();
+                    markerOptions.setIcon(IconFactory.getInstance(NavigationLauncherActivity.this.getApplicationContext()).fromResource(R.mipmap.car_icon_foreground));
+                    LatLng latLng = new LatLng(vehicle.getLatitude(), vehicle.getLongitude());
+                    markerOptions.setPosition(latLng);
 
-    @Override
-    public void onMapLongClick(@NonNull LatLng point) {
-        addPointToRoute(point.getLatitude(), point.getLongitude());
-        updateRouteAfterWaypointChange();
+                    mapboxMap.addMarker(markerOptions);
+                }
+            }
+        });
+/*
+        ref.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                List<LocationTrackingModel> types = queryDocumentSnapshots.toObjects(LocationTrackingModel.class);
+                locationTrackingModelArrayList.addAll(types);
+                for(LocationTrackingModel vehicle:locationTrackingModelArrayList){
+                    MarkerOptions markerOptions= new MarkerOptions();
+                    markerOptions.setIcon(IconFactory.getInstance(NavigationLauncherActivity.this.getApplicationContext()).fromResource(R.drawable.map_marker_light));
+                    LatLng latLng=new LatLng(vehicle.getLatitude(),vehicle.getLongitude());
+                    markerOptions.setPosition(latLng);
 
+                    mapboxMap.addMarker(markerOptions);
+                }
+
+            }
+        });
+
+ */
+        return locationTrackingModelArrayList;
     }
+
 
     private void addPointToRoute(double lat, double lng) {
         waypoints.add(Point.fromLngLat(lng, lat));
@@ -537,6 +650,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
             return;
         }
 
+        /*
         if (startFromLocation) {
             Location lastKnownLocation = getLastKnownLocation();
             if (lastKnownLocation == null) {
@@ -552,6 +666,9 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
             }
         }
 
+         */
+
+
 
         for (int i = 0; i < waypoints.size(); i++) {
 
@@ -560,9 +677,13 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
                 builder.origin(p);
             } else if (i < waypoints.size() - 1) {
                 builder.addWaypoint(p);
+
+
             } else {
                 builder.destination(p);
             }
+
+
         }
 
         showLoading();

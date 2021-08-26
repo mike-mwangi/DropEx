@@ -3,16 +3,17 @@ package com.example.dropex.Model;
 
 
 import com.graphhopper.directions.api.client.model.Vehicle;
+import com.graphhopper.directions.api.client.model.VehicleType;
 import com.mapbox.geojson.Point;
 
 public class CustomVehicle extends Vehicle {
     private String driverName;
     private String vehiclePlateNumber;
     private Point driverLocation;
-    private CustomVehicleType customVehicleType;
+    private VehicleType customVehicleType;
     private int icon;
 
-    public CustomVehicle(String driverName, String vehiclePlateNumber, Point driverLocation, CustomVehicleType customVehicleType,int icon) {
+    public CustomVehicle(String driverName, String vehiclePlateNumber, Point driverLocation, VehicleType customVehicleType,int icon) {
         this.driverName = driverName;
         this.vehiclePlateNumber = vehiclePlateNumber;
         this.driverLocation = driverLocation;
@@ -55,11 +56,11 @@ public class CustomVehicle extends Vehicle {
         this.driverLocation = driverLocation;
     }
 
-    public CustomVehicleType getCustomVehicleType() {
+    public VehicleType getCustomVehicleType() {
         return customVehicleType;
     }
 
-    public void setCustomVehicleType(CustomVehicleType customVehicleType) {
+    public void setCustomVehicleType(VehicleType customVehicleType) {
         this.customVehicleType = customVehicleType;
     }
 }

@@ -13,7 +13,6 @@ import android.widget.TextView;
 
 import com.example.dropex.Model.ConstantVehicleTypes;
 import com.example.dropex.Model.CustomVehicle;
-import com.example.dropex.Model.CustomVehicleType;
 import com.example.dropex.R;
 import com.graphhopper.directions.api.client.model.VehicleType;
 
@@ -96,7 +95,7 @@ public class MeansOfTransportFragment extends Fragment implements View.OnClickLi
     }
     public void setCars(int numberOfCars){
         ArrayList<CustomVehicle> vehicles=new ArrayList<>();
-        ArrayList<CustomVehicleType> vehicleTypes=new ArrayList<>();
+        ArrayList<VehicleType> vehicleTypes=new ArrayList<>();
         for (int i=0;i<numberOfCars;i++){
             CustomVehicle vehicle=new CustomVehicle();
             vehicle.setVehicleId("default"+i);
@@ -109,7 +108,7 @@ public class MeansOfTransportFragment extends Fragment implements View.OnClickLi
     }
     public void setBikes(int numberOfBikes){
         ArrayList<CustomVehicle> vehicles=new ArrayList<>();
-        ArrayList<CustomVehicleType> vehicleTypes=new ArrayList<>();
+        ArrayList<VehicleType> vehicleTypes=new ArrayList<>();
         for (int i=0;i<numberOfBikes;i++){
             CustomVehicle vehicle=new CustomVehicle();
             vehicle.setVehicleId("default"+i);
@@ -122,7 +121,7 @@ public class MeansOfTransportFragment extends Fragment implements View.OnClickLi
     }
     public void setTrucks(int numberOfTrucks){
         ArrayList<CustomVehicle> vehicles=new ArrayList<>();
-        ArrayList<CustomVehicleType> vehicleTypes=new ArrayList<>();
+        ArrayList<VehicleType> vehicleTypes=new ArrayList<>();
         for (int i=0;i<numberOfTrucks;i++){
             CustomVehicle vehicle=new CustomVehicle();
             vehicle.setVehicleId("default"+i);

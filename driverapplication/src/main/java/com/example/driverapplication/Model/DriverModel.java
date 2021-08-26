@@ -4,16 +4,26 @@ public class DriverModel {
 
 
     private String firstName, lastName, phoneNumber, email, city,userImageUrl;
+    private CustomVehicle vehicle;
+
+    public CustomVehicle getVehicle() {
+        return vehicle;
+    }
+
+    public void setVehicle(CustomVehicle vehicle) {
+        this.vehicle = vehicle;
+    }
 
     public DriverModel() {}
 
-    public DriverModel(String firstName, String lastName, String phoneNumber, String email, String city,String userImageUrl) {
+    public DriverModel(String firstName, String lastName, String phoneNumber, String email, String city, String userImageUrl, CustomVehicle vehicle) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.city = city;
         this.userImageUrl = userImageUrl;
+        this.vehicle = vehicle;
     }
 
     public String getUserImageUrl() {
