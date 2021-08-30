@@ -8,19 +8,29 @@ public class CustomService extends Service {
     private String customerPhoneNumber;
     private String assignedDriverID;
     private String status;
+    private Boolean delivered;
     private String itemImage;
     private String itemDeliveryVerificationCode;
     private int customSize;
 
-    public CustomService(String deliveryNote, String customerName, String customerPhoneNumber, String assignedDriverID, String status, String itemImage, String itemDeliveryVerificationCode) {
+    public Boolean getDelivered() {
+        return delivered;
+    }
+
+    public void setDelivered(Boolean delivered) {
+        this.delivered = delivered;
+    }
+
+    public CustomService(String deliveryNote, String customerName, String customerPhoneNumber, String assignedDriverID, String status, Boolean delivered, String itemImage, String itemDeliveryVerificationCode, int customSize) {
         this.deliveryNote = deliveryNote;
         this.customerName = customerName;
         this.customerPhoneNumber = customerPhoneNumber;
         this.assignedDriverID = assignedDriverID;
         this.status = status;
+        this.delivered = delivered;
         this.itemImage = itemImage;
         this.itemDeliveryVerificationCode = itemDeliveryVerificationCode;
-
+        this.customSize = customSize;
     }
 
     public CustomService() {

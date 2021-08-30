@@ -1,5 +1,6 @@
 package com.example.dropex.ui.shipments.main;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -12,7 +13,18 @@ import androidx.navigation.Navigation;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.example.dropex.NavigationLauncherActivity;
 import com.example.dropex.R;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputLayout;
+import com.google.android.material.textview.MaterialTextView;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -29,6 +41,8 @@ public class CallToActionFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private CardView sendPackage;
+    private TextInputLayout verificationCode;
+    private MaterialButton verifyCode;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -76,6 +90,16 @@ public class CallToActionFragment extends Fragment {
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         sendPackage=view.findViewById(R.id.send_package);
+        verificationCode=view.findViewById(R.id.recieve_package_code_input);
+        verifyCode=view.findViewById(R.id.trackLocationBtn);
+        verifyCode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                connectToDriver(verificationCode.getEditText().getText().toString());
+
+            }
+        });
         //  receivePackage=findViewById(R.id.receive_package);
         sendPackage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,6 +107,19 @@ public class CallToActionFragment extends Fragment {
                 NavDirections action =
                         CallToActionFragmentDirections.actionCTAFragmentToJobInformation();
                 Navigation.findNavController(v).navigate(action);
+            }
+        });
+    }
+
+    private void connectToDriver(String code) {
+        Task<DocumentSnapshot> documentSnapshotTask = FirebaseFirestore.getInstance().collection("on-going-jobs").document(code).get();
+        documentSnapshotTask.addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                String driverID = documentSnapshot.get("driverID").toString();
+                Intent goToMap=new Intent(CallToActionFragment.this.getContext(), NavigationLauncherActivity.class);
+                goToMap.putExtra("driverID",driverID);
+
             }
         });
     }

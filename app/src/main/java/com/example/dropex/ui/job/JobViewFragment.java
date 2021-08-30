@@ -121,6 +121,10 @@ public class JobViewFragment extends Fragment implements ShipmentItemAdapter.shi
                     @Override
                     public void onClick(View v) {
 
+                        Intent intent=new Intent(getContext(),NavigationLauncherActivity.class);
+                        intent.putExtra("JOBID",job.getJobID());
+                        startActivity(intent);
+
                     }
                 }
         );

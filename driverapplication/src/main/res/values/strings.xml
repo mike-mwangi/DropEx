@@ -97,5 +97,7 @@
     <string name="plate_number">Car Plate Number</string>
     <string name="manufactured_year">Manufactured Year</string>
     <string name="start_work">Start Work</string>
+    <string name="confirmation_code">Confirmation Code</string>
+    <string name="confirm">Confirm</string>
 
 </resources>

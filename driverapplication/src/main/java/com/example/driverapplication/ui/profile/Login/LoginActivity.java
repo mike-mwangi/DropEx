@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.example.driverapplication.MainActivity;
 import com.example.driverapplication.R;
 import com.example.driverapplication.ui.profile.Register.RegisterActivity;
+import com.example.driverapplication.ui.profile.main.WelcomeActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -113,7 +114,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
                     if (user.isEmailVerified()){
                         //To driver home screen
-                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                        startActivity(new Intent(LoginActivity.this, WelcomeActivity.class));
                         finish();
                     } else {
                         user.sendEmailVerification();
