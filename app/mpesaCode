@@ -1,0 +1,102 @@
+//Import dependency :  implementation 'com.androidstudy:daraja:1.0.2'
+
+
+
+package com.example.testdarajaapi;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import com.androidstudy.daraja.Daraja;
+import com.androidstudy.daraja.DarajaListener;
+import com.androidstudy.daraja.model.AccessToken;
+import com.androidstudy.daraja.model.LNMExpress;
+import com.androidstudy.daraja.model.LNMResult;
+import com.androidstudy.daraja.util.TransactionType;
+
+public class MainActivity extends AppCompatActivity {
+
+//Get amount from user. For this case it is hardcoded
+    EditText editTextPhoneNumber;
+    Button sendSTKPushBtn;
+    String mobileNumber;
+
+
+
+//    String CONSUMER_KEY = "1EjOGAeLTgwnwZA8QcVupAJdbWFGpeVe";
+//    String CONSUMER_SECRET = "LGbGd5inl4jCQYn8";
+// Pass the strings above as parameters in line 41
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        editTextPhoneNumber = (EditText) findViewById(R.id.editTextPhoneNumber);
+        sendSTKPushBtn = (Button) findViewById(R.id.sendSTKPushBtn);
+
+        Daraja daraja = Daraja.with("1EjOGAeLTgwnwZA8QcVupAJdbWFGpeVe", "LGbGd5inl4jCQYn8", new DarajaListener<AccessToken>() {
+            @Override
+            public void onResult(@NonNull AccessToken accessToken) {
+                Log.i(MainActivity.this.getClass().getSimpleName(), accessToken.getAccess_token());
+                Toast.makeText(MainActivity.this, "TOKEN : " + accessToken.getAccess_token(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.e(MainActivity.this.getClass().getSimpleName(), error);
+            }
+        });
+
+
+// OnClick listener for the STKPUSH button
+        sendSTKPushBtn.setOnClickListener(v -> {
+
+            //Get Phone Number from User Input or Read from Firebase in our case
+            mobileNumber = editTextPhoneNumber.getText().toString().trim();
+
+            if (TextUtils.isEmpty(mobileNumber)) {
+                editTextPhoneNumber.setError("Please Provide a Phone Number");
+                return;
+            }
+
+            Toast.makeText(MainActivity.this, "Wait for STK Push", Toast.LENGTH_SHORT ).show();
+
+            LNMExpress lnmExpress = new LNMExpress(
+                    "174379", //Business Shortcode. Use as-is for sandbox environment
+                    "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919",  // Use as-is for sandbox environment
+                    TransactionType.CustomerPayBillOnline, //Paybill transaction
+                    "1", //Amount to be paid...Hardcoded
+                    "254708374149", //Party A - Use as-is for sandbox environment
+                    "174379",  //Business Shortcode. Use as-is for sandbox environment
+                    mobileNumber, //Party B - Where to send STKPUSH
+                    "https://674c-102-222-145-74.ngrok.io/api/stkpush", //Callback url to receive processed request from Mpesa
+                    "BILL005", //Receipt number. Generate random strings to avoid duplicates
+                    "Pay Bill" //TransactionType
+            );
+
+            daraja.requestMPESAExpress(lnmExpress,
+                    new DarajaListener<LNMResult>() {
+                        @Override
+                        public void onResult(@NonNull LNMResult lnmResult) {
+                            Log.i(MainActivity.this.getClass().getSimpleName(), lnmResult.ResponseDescription);
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            Log.i(MainActivity.this.getClass().getSimpleName(), error);
+                        }
+                    }
+            );
+        });
+
+
+    }
+}
