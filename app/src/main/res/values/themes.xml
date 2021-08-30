@@ -17,6 +17,8 @@
     <!--Top level DayNight theme to be used in AndroidManifest.xml-->
     <style name="Theme.MyApp" parent="Base.Theme.MyApp" >
         <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+
     </style>
     <!--Base custom theme which will be shared between both light and dark theme variants-->
     <style name="Base.Theme.MyApp" parent="Base.Theme.MaterialThemeBuilder">
@@ -25,6 +27,8 @@
         <!--colorSecondary colors are most often used as accents on components, such as FABs and -->
         <!--selection controls.-->
         <!--Color-->
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
         <item name="colorPrimary">@color/reply_blue_700</item>
         <item name="colorPrimaryVariant">@color/reply_blue_800</item>
         <item name="colorSecondary">@color/reply_orange_500</item>

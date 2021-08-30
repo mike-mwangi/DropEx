@@ -11,6 +11,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 
 import android.provider.Settings;
@@ -59,9 +60,11 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textview.MaterialTextView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -188,11 +191,15 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     private MaterialCardView vans;
     private MaterialCardView cars;
     private MaterialCardView bikes;
+    private MaterialTextView heyText;
 
     private ConstraintLayout bottomSheet;
     private LayoutInflater inflater;
     private CustomerModel customer;
     private Job job;
+    private MaterialButton CTOButton;
+    private ArrayList<Marker> bikeVehicleMarkers=new ArrayList<>();
+    private String intentDriverID="";
 
 
     @Override
@@ -218,7 +225,18 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         vans=bottomSheet.findViewById(R.id.trucks);
         cars=bottomSheet.findViewById(R.id.cars);
         setOnClickListenerForCards();
+        bikes.setVisibility(View.GONE);
+        cars.setVisibility(View.GONE);
+        vans.setVisibility(View.GONE);
 
+        CTOButton=bottomSheet.findViewById(R.id.call_to_action_button);
+        heyText=bottomSheet.findViewById(R.id.hey);
+        CTOButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(NavigationLauncherActivity.this,CallToActionActivity.class));
+            }
+        });
 
         BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
 
@@ -264,19 +282,25 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
             @Override
             public void onClick(View v) {
                 PostedJob postedJob=new PostedJob(job.getJobID(),FirebaseAuth.getInstance().getUid(),job.getPickUpLocation().getName());
-                Task<Void> postJob = FirebaseFirestore.getInstance().collection("PostedJob").document(ConstantVehicleTypes.getBikeVehicleType().getProfile().getValue()).collection("jobs").document(customer.getFirstName() + customer.getEmail()).set(postedJob);
+                Task<Void> postJob = FirebaseFirestore.getInstance().collection("PostedJob").document(ConstantVehicleTypes.getBikeVehicleType().getProfile().getValue()).collection("jobs").document(FirebaseAuth.getInstance().getUid()).set(postedJob);
                 postJob.addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
                         //TODO : show progressbar;
-                        FirebaseFirestore.getInstance().collection("PostedJob").document(ConstantVehicleTypes.getBikeVehicleType().getProfile().getValue()).collection("jobs").document(customer.getFirstName() + customer.getEmail()).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                        FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getUid()).collection("jobs").document(job.getJobID()).addSnapshotListener(new EventListener<DocumentSnapshot>() {
                             @Override
                             public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
-                                String driverID = value.get("driverID").toString();
-                                Toast.makeText(NavigationLauncherActivity.this,driverID +" this is your driver",Toast.LENGTH_LONG);
+                                Job job1= value.toObject(Job.class);
+                                if(job1.getAssignedDriver()!=null){
+                                    //hide loading
+                                    Log.e(" driver id fetched",job1.getAssignedDriver());
+                                    fetchLocationUpdates(job1.getAssignedDriver());
+                                    job=job1;
 
+                                }
                             }
                         });
+
                     }
                 });
 
@@ -284,6 +308,9 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
             }
         });
     }
+
+
+
     private void setVehiclePrices(Integer cost){
         int bikePrice=cost*2;
         bikePriceTextView.setText(String.valueOf(bikePrice)+" Kshs");
@@ -455,12 +482,19 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
                             // Remove the first point if we want to start from the current location
 
                         }
-
+                        bikes.setVisibility(View.VISIBLE);
+                        cars.setVisibility(View.VISIBLE);
+                        vans.setVisibility(View.VISIBLE);
+                        CTOButton.setVisibility(View.GONE);
+                        heyText.setVisibility(View.GONE);
                         setVehiclePrices(job.getSolution().getCosts());
                         updateWaypoints(points);
 
                     }
                 });
+            }
+            else if(intent.getStringExtra("driverID")!=null){
+                intentDriverID = intent.getStringExtra("driverID");
             }
 
         }
@@ -551,13 +585,14 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
             public boolean onMarkerClick(@NonNull @NotNull Marker marker) {
                 long id=marker.getId();
                 final String title = marker.getTitle();
-               // View childLayout = inflater.inflate(R.layout.fragment_shipping_item, bottomSheet);
+              //  bottomSheet
+                //View childLayout = inflater.inflate(R.layout.fragment_shipping_item, bottomSheet);
                 //BottomSheetHandler.showShipment(title,bottomSheet);
                 return false;
             }
         });
         initMapRoute();
-fetchLocationUpdates("");
+        fetchLocationUpdates(intentDriverID);
 
 
         this.mapboxMap.setOnInfoWindowClickListener(new MapboxMap.OnInfoWindowClickListener() {
@@ -595,18 +630,27 @@ fetchLocationUpdates("");
                 public void onEvent(@Nullable @org.jetbrains.annotations.Nullable QuerySnapshot value, @Nullable @org.jetbrains.annotations.Nullable FirebaseFirestoreException error) {
                     List<LocationTrackingModel> types = value.toObjects(LocationTrackingModel.class);
                     locationTrackingModelArrayList.addAll(types);
+
+
                     for (LocationTrackingModel vehicle : locationTrackingModelArrayList) {
                         MarkerOptions markerOptions = new MarkerOptions();
                         markerOptions.setIcon(IconFactory.getInstance(NavigationLauncherActivity.this.getApplicationContext()).fromResource(R.mipmap.car_icon_foreground));
                         LatLng latLng = new LatLng(vehicle.getLatitude(), vehicle.getLongitude());
                         markerOptions.setPosition(latLng);
 
-                        mapboxMap.addMarker(markerOptions);
+                        Marker marker = mapboxMap.addMarker(markerOptions);
+                        bikeVehicleMarkers.add(marker);
+
                     }
                 }
             });
         }
         else {
+            if(!bikeVehicleMarkers.isEmpty()){
+                for(Marker marker:bikeVehicleMarkers){
+                    mapboxMap.removeMarker(marker);
+                }
+            }
             FirebaseFirestore db = FirebaseFirestore.getInstance();
             DocumentReference ref = db.collection("driverLocation").document(driverID);
          ref.addSnapshotListener(new EventListener<DocumentSnapshot>() {
@@ -614,7 +658,7 @@ fetchLocationUpdates("");
              public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
                  LocationTrackingModel locationTrackingModel = value.toObject(LocationTrackingModel.class);
                  MarkerOptions markerOptions = new MarkerOptions();
-                 markerOptions.setIcon(IconFactory.getInstance(NavigationLauncherActivity.this.getApplicationContext()).fromResource(R.mipmap.car_icon_foreground));
+                 markerOptions.setIcon(IconFactory.getInstance(NavigationLauncherActivity.this.getApplicationContext()).fromResource(R.mipmap.truck_icon_foreground));
                  LatLng latLng = new LatLng(locationTrackingModel.getLatitude(), locationTrackingModel.getLongitude());
                  markerOptions.setPosition(latLng);
 
@@ -711,12 +755,13 @@ fetchLocationUpdates("");
             Point p = waypoints.get(i);
             if (i == 0 && !startFromLocation) {
                 builder.origin(p);
-            } else if (i < waypoints.size() - 1) {
+            } else if (i < waypoints.size() - 2) {
                 builder.addWaypoint(p);
 
 
             } else {
                 builder.destination(p);
+                break;
             }
 
 

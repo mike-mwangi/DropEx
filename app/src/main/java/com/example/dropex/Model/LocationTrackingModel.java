@@ -1,13 +1,18 @@
 package com.example.dropex.Model;
 
+import com.google.firebase.firestore.ServerTimestamp;
+
+import java.util.Date;
+
 public class LocationTrackingModel {
     private int driverID;
     private int vehicleType;
     private double latitude;
     private double longitude;
-    private double lastUpdatedTime;
+    @ServerTimestamp
+    private Date lastUpdatedTime;
 
-    public LocationTrackingModel(int driverID, int vehicleType, double latitude, double longitude, double lastUpdatedTime) {
+    public LocationTrackingModel(int driverID, int vehicleType, double latitude, double longitude, Date lastUpdatedTime) {
         this.driverID = driverID;
         this.vehicleType = vehicleType;
         this.latitude = latitude;
@@ -50,11 +55,11 @@ public class LocationTrackingModel {
         this.longitude = longitude;
     }
 
-    public double getLastUpdatedTime() {
+    public Date getLastUpdatedTime() {
         return lastUpdatedTime;
     }
 
-    public void setLastUpdatedTime(double lastUpdatedTime) {
+    public void setLastUpdatedTime(Date lastUpdatedTime) {
         this.lastUpdatedTime = lastUpdatedTime;
     }
 }

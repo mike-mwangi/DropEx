@@ -37,6 +37,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
@@ -73,6 +74,7 @@ public class ShippingInformationFragment extends Fragment implements View.OnClic
 public String TAG=this.getTag();
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private LinearProgressIndicator linearProgressIndicator;
 
     private static int currentPage = 0;
     private static ArrayList<ShippingItemFragment> fragments = new ArrayList<ShippingItemFragment>();
@@ -80,6 +82,7 @@ public String TAG=this.getTag();
     private OnBoardingViewPagerAdapter adapter;
     NavController navController;
     private CustomerModel currentCustomer;
+
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -114,9 +117,10 @@ public String TAG=this.getTag();
     @Override
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
     navController = Navigation.findNavController(view);
 
-
+        linearProgressIndicator=view.findViewById(R.id.linearProgressIndicator);
         final int numberOfShipments = ShippingInformationFragmentArgs.fromBundle(getArguments()).getNumberOfShipments();
         viewPager=(ViewPager2) view.findViewById(R.id.viewpager);
         TabLayout tabLayout=view.findViewById(R.id.tab);
@@ -178,82 +182,79 @@ public String TAG=this.getTag();
 
                 for(int i=0;i<fragments.size();i++){
                     ShippingItemFragment fragment=fragments.get(i);
-                    if(fragment.getService()==null){
+                    CustomService service = fragment.getService();
+                    if(service ==null){
                         flagIncompleteForms.add(i);
+                        break;
                     }
                     else {
-                        fragment.getService().setItemDeliveryVerificationCode(generateVerificationCode());
-                        fragment.getService().setStatus("NOT-DELIVERED");
-                        fragment.getService().setDelivered(false);
-                        services.add(fragment.getService());
+                        service.setStatus("NOT-DELIVERED");
+                        service.setDelivered(false);
+                        services.add(service);
                     }
                 }
+                    if(flagIncompleteForms.isEmpty()) {
+                      showLoading(10);
+                        currentCustomer.getCurrentJob().setServices(services);
 
-                    currentCustomer.getCurrentJob().setServices(services);
-
-                    Gson gson = new Gson();
-                    final String s = currentCustomer.getCurrentJob().buildJsonRequest();
-                    //to go back to previous version just remove the .enque from here to job posttoGraphopper
-                    currentCustomer.getCurrentJob().postToGraphhopper(s, this.getActivity()).enqueue(new Callback() {
-                        @Override
-                        public void onFailure(okhttp3.Call call, IOException e) {
-                            Log.e("failure","dont know what happened");
-                        }
-
-                        @Override
-                        public void onResponse(okhttp3.Call call, okhttp3.Response response) throws IOException {
-                            String jsonData = response.body().string();
-                            JSONObject Jobject = null;
-                            try {
-                                JobSolution jobSolution=new JobSolution();
-                                Jobject = new JSONObject(jsonData);
-                                String jobID= (String) Jobject.get("job_id");
-
-
-
-                                Log.e("JOB ID",jobID);
-                                currentCustomer.getCurrentJob().setJobID(jobID);
-                                currentCustomer.getCurrentJob().setSolution(jobSolution);
-                                ((UserClient)getActivity().getApplicationContext()).setCustomer(currentCustomer);
-                                FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid()).collection("jobs").document(currentCustomer.getCurrentJob().getJobID()).set(currentCustomer.getCurrentJob()).addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull @NotNull Exception e) {
-                                        Log.e("Shippin",e.toString());
-                                    }
-                                });
-                                job = currentCustomer.getCurrentJob();
-                               // new FetchSolutionTaskButReturnJobSolution(ShippingInformationFragment.this,getString(R.string.gh_key)).execute(new FetchSolutionConfig(job.getJobID(), "default"));
-
-
-                                Intent goToNavLauncher=new Intent(ShippingInformationFragment.this.getActivity(), NavigationLauncherActivity.class);
-                                String uriString="https://graphhopper.com/api/1/vrp/solution/"+currentCustomer.getCurrentJob().getJobID()+"?vehicle_id="+"default"+"&key="+getString(R.string.gh_key);
-                                Uri uri=Uri.parse("https://graphhopper.com/api/1/vrp/solution/"+currentCustomer.getCurrentJob().getJobID()+"?vehicle_id="+"default"+"&key="+getString(R.string.gh_key));
-                                goToNavLauncher.setData(uri);
-                                FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid()).collection("jobs").document(currentCustomer.getCurrentJob().getJobID()).set(currentCustomer.getCurrentJob()).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull @NotNull Task<Void> task) {
-                                        new FetchSolutionTaskButReturnJobSolution(ShippingInformationFragment.this, getString(R.string.gh_key)).execute(new FetchSolutionConfig(job.getJobID(), "default"));
-                                    }
-                                });
-                                Log.e("URI", String.valueOf(uri));
-                                Log.e("URI string", uriString);
-
-                               // startActivity(goToNavLauncher);
-
-
-
-
-
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
+                        Gson gson = new Gson();
+                        final String s = currentCustomer.getCurrentJob().buildJsonRequest();
+                        //to go back to previous version just remove the .enque from here to job posttoGraphopper
+                        currentCustomer.getCurrentJob().postToGraphhopper(s, this.getActivity()).enqueue(new Callback() {
+                            @Override
+                            public void onFailure(okhttp3.Call call, IOException e) {
+                                Log.e("failure", "dont know what happened");
                             }
 
-                        }
-                    });
-                    currentCustomer.getJobs().add(currentCustomer.getCurrentJob());
+                            @Override
+                            public void onResponse(okhttp3.Call call, okhttp3.Response response) throws IOException {
+                                String jsonData = response.body().string();
+                                JSONObject Jobject = null;
+                                showLoading(25);
+                                try {
+                                    JobSolution jobSolution = new JobSolution();
+                                    Jobject = new JSONObject(jsonData);
+                                    String jobID = (String) Jobject.get("job_id");
 
 
+                                    Log.e("JOB ID", jobID);
+                                    currentCustomer.getCurrentJob().setJobID(jobID);
+                                    currentCustomer.getCurrentJob().setSolution(jobSolution);
+                                    ((UserClient) getActivity().getApplicationContext()).setCustomer(currentCustomer);
+
+                                    job = currentCustomer.getCurrentJob();
+                                    // new FetchSolutionTaskButReturnJobSolution(ShippingInformationFragment.this,getString(R.string.gh_key)).execute(new FetchSolutionConfig(job.getJobID(), "default"));
+
+
+                                    Intent goToNavLauncher = new Intent(ShippingInformationFragment.this.getActivity(), NavigationLauncherActivity.class);
+                                    String uriString = "https://graphhopper.com/api/1/vrp/solution/" + currentCustomer.getCurrentJob().getJobID() + "?vehicle_id=" + "default" + "&key=" + getString(R.string.gh_key);
+                                    Uri uri = Uri.parse("https://graphhopper.com/api/1/vrp/solution/" + currentCustomer.getCurrentJob().getJobID() + "?vehicle_id=" + "default" + "&key=" + getString(R.string.gh_key));
+                                    goToNavLauncher.setData(uri);
+                                    FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid()).collection("jobs").document(currentCustomer.getCurrentJob().getJobID()).set(currentCustomer.getCurrentJob()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull @NotNull Task<Void> task) {
+                                            new FetchSolutionTaskButReturnJobSolution(ShippingInformationFragment.this, getString(R.string.gh_key)).execute(new FetchSolutionConfig(job.getJobID(), "default"));
+                                            showLoading(75);
+                                        }
+                                    });
+                                    Log.e("URI", String.valueOf(uri));
+                                    Log.e("URI string", uriString);
+
+                                    // startActivity(goToNavLauncher);
+
+
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+
+                            }
+                        });
+                        currentCustomer.getJobs().add(currentCustomer.getCurrentJob());
+
+                    }
+                    else {
+
+                    }
 
 
 
@@ -278,6 +279,7 @@ public String TAG=this.getTag();
                 Intent goToNavLauncher=new Intent(ShippingInformationFragment.this.getActivity(), NavigationLauncherActivity.class);
                 goToNavLauncher.putExtra("JOBID",job.getJobID());
                 startActivity(goToNavLauncher);
+                ShippingInformationFragment.this.getActivity().finish();
 
             }
         });
@@ -312,5 +314,11 @@ public String TAG=this.getTag();
 
         System.out.println(generatedString);
         return generatedString;
+    }
+    public void showLoading(int progress){
+        viewPager.setVisibility(View.INVISIBLE);
+        linearProgressIndicator.setVisibility(View.VISIBLE);
+        linearProgressIndicator.setProgress(progress,true);
+
     }
 }

@@ -13,6 +13,7 @@ public class CustomService extends Service {
     private String itemDeliveryVerificationCode;
     private int customSize;
 
+
     public Boolean getDelivered() {
         return delivered;
     }

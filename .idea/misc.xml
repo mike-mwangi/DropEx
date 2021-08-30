@@ -5,15 +5,25 @@
       <map>
         <entry key="app/src/main/res/drawable/bg_gradient.xml" value="0.209375" />
         <entry key="app/src/main/res/drawable/splash_background.xml" value="0.209375" />
+        <entry key="app/src/main/res/layout/activity_navigation_launcher.xml" value="0.22" />
         <entry key="app/src/main/res/layout/activity_splash_screen.xml" value="0.17844202898550723" />
+        <entry key="app/src/main/res/layout/bottom_sheet.xml" value="0.18568840579710144" />
         <entry key="app/src/main/res/layout/fragment_call_to_action.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_job_view.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/fragment_shipping_information.xml" value="0.19322916666666667" />
+        <entry key="app/src/main/res/layout/fragment_shipping_item.xml" value="0.19322916666666667" />
+        <entry key="app/src/main/res/layout/layout_get_started.xml" value="0.25" />
         <entry key="app/src/main/res/layout/shipping_list_item.xml" value="0.25" />
+        <entry key="driverapplication/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.209375" />
         <entry key="driverapplication/src/main/res/drawable/bg_gradient.xml" value="0.209375" />
         <entry key="driverapplication/src/main/res/drawable/splash_background.xml" value="0.209375" />
+        <entry key="driverapplication/src/main/res/font/quicksand.xml" value="0.2234375" />
         <entry key="driverapplication/src/main/res/layout/activity_welcome.xml" value="0.17844202898550723" />
         <entry key="driverapplication/src/main/res/layout/bottom_sheet.xml" value="0.17844202898550723" />
+        <entry key="driverapplication/src/main/res/layout/fragment_shipment_item.xml" value="0.22" />
         <entry key="driverapplication/src/main/res/layout/next_stop_layout.xml" value="0.17844202898550723" />
+        <entry key="driverapplication/src/main/res/layout/start_work_layout.xml" value="0.19322916666666667" />
+        <entry key="driverapplication/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.10520833333333333" />
       </map>
     </option>
   </component>

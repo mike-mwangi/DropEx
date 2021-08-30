@@ -112,7 +112,7 @@ public class CallToActionFragment extends Fragment {
     }
 
     private void connectToDriver(String code) {
-        Task<DocumentSnapshot> documentSnapshotTask = FirebaseFirestore.getInstance().collection("on-going-jobs").document(code).get();
+     /*   Task<DocumentSnapshot> documentSnapshotTask = FirebaseFirestore.getInstance().collection("on-going-jobs").document(code).get();
         documentSnapshotTask.addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
@@ -122,5 +122,10 @@ public class CallToActionFragment extends Fragment {
 
             }
         });
+
+      */
+        Intent connectToDriver=new Intent(getActivity(),NavigationLauncherActivity.class);
+        connectToDriver.putExtra("driverID",code);
+        startActivity(connectToDriver);
     }
 }

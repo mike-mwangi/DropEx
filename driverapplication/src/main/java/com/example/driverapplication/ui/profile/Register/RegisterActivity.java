@@ -200,7 +200,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                             vehicle.setVehiclePlateNumber(sCarPlateNumber);
                             vehicle.setVehicleId(phone_number);
                             vehicle.setCustomVehicleType(type);
-                            DriverModel driver = new DriverModel(firstName, lastName, phone_number, email, city,"",vehicle);
+                            DriverModel driver = new DriverModel(firstName, lastName, phone_number, email, city,"",vehicle,null);
 
                             FirebaseDatabase.getInstance().getReference("Drivers")
                                     .child(FirebaseAuth.getInstance().getCurrentUser().getUid())

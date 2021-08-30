@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.Build;
 
 import androidx.annotation.RequiresApi;
@@ -38,8 +39,10 @@ public class JobNotification  {
         iStopService.putExtra("key", "Accept");
         iStopService.putExtra("userID",userID);
         iStopService.putExtra("JOBID",jobID);
-        PendingIntent piStopService = PendingIntent.getService(
-                context, 1, iStopService, PendingIntent.FLAG_UPDATE_CURRENT);
+        Uri uri=new Uri.Builder().appendQueryParameter("JOBID",jobID).appendQueryParameter("userID",userID).build();
+        iStopService.setData(uri);
+        PendingIntent piStopService = PendingIntent.getActivity(
+                context, 0, iStopService, 0);
         Notification.Action action= new Notification.Action.Builder(R.drawable.ic_launcher_foreground,"Accept",piStopService).build();
 
         Notification notification = new Notification.Builder(context, channelId)
@@ -55,7 +58,7 @@ public class JobNotification  {
 
 
                 .addAction(
-                       action)
+                        R.drawable.ic_launcher_foreground,"Accept",piStopService)
 
                 // Automatically dismiss the notification when it is touched.
                 .setAutoCancel(false).build();
@@ -84,12 +87,14 @@ public class JobNotification  {
                                  final String title, final String text,String userID,String jobID) {
         final Resources res = context.getResources();
 
-        Intent iStopService = new Intent(context, TrackingService.class);
+        Intent iStopService = new Intent(context, NavigationLauncherActivity.class);
         iStopService.putExtra("key", "stop");
         iStopService.putExtra("userID",userID);
-        iStopService.putExtra("jobID",jobID);
-        PendingIntent piStopService = PendingIntent.getService(
-                context, 1, iStopService, PendingIntent.FLAG_UPDATE_CURRENT);
+        iStopService.putExtra("JOBID",jobID);
+        Uri uri=new Uri.Builder().appendQueryParameter("JOBID",jobID).appendQueryParameter("userID",userID).build();
+        iStopService.setData(uri);
+        PendingIntent piStopService = PendingIntent.getActivity(
+                context, 0, iStopService,0);
         NotificationCompat.Action action= new NotificationCompat.Action.Builder(R.drawable.ic_launcher_foreground,"Accept",piStopService).build();
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
 
@@ -97,7 +102,7 @@ public class JobNotification  {
                 // and vibration.
                 .setDefaults(Notification.DEFAULT_ALL)
 
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setSmallIcon(R.mipmap.ic_launcher_foreground)
                 .setContentTitle(title)
                 .setContentText(text)
 

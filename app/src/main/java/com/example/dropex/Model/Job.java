@@ -50,6 +50,15 @@ public class Job {
     private boolean hasBeenFulfilled=false;
     private int cost;
     public Solution solution;
+    private String assignedDriver;
+
+    public String getAssignedDriver() {
+        return assignedDriver;
+    }
+
+    public void setAssignedDriver(String assignedDriver) {
+        this.assignedDriver = assignedDriver;
+    }
 
     @ServerTimestamp
     public Date time;
@@ -87,7 +96,7 @@ public class Job {
     public Job() {
     }
 
-    public Job(String jobID, ArrayList<CustomVehicle> vehicles, ArrayList<CustomVehicleType> vehicleTypes, ArrayList<CustomService> services, GeocodingLocation pickUpLocation, boolean hasBeenFulfilled, int cost, Date time) {
+    public Job(String jobID, ArrayList<CustomVehicle> vehicles, ArrayList<CustomVehicleType> vehicleTypes, ArrayList<CustomService> services, GeocodingLocation pickUpLocation, boolean hasBeenFulfilled, int cost, Solution solution, String assignedDriver, Date time) {
         this.jobID = jobID;
         this.vehicles = vehicles;
         this.vehicleTypes = vehicleTypes;
@@ -95,6 +104,8 @@ public class Job {
         this.pickUpLocation = pickUpLocation;
         this.hasBeenFulfilled = hasBeenFulfilled;
         this.cost = cost;
+        this.solution = solution;
+        this.assignedDriver = assignedDriver;
         this.time = time;
     }
 
@@ -146,7 +157,7 @@ public class Job {
 
         return call;
     }
-    public String givenUsingJava8_whenGeneratingRandomAlphanumericString_thenCorrect() {
+    public String getVerificationCode() {
         int leftLimit = 48; // numeral '0'
         int rightLimit = 122; // letter 'z'
         int targetStringLength = 10;

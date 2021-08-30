@@ -3,6 +3,7 @@ package com.example.driverapplication.Model;
 import com.graphhopper.directions.api.client.model.Service;
 
 public class CustomService extends Service {
+    private int position;
     private String deliveryNote;
     private String customerName;
     private String customerPhoneNumber;
@@ -11,8 +12,18 @@ public class CustomService extends Service {
     private String itemImage;
     private String itemDeliveryVerificationCode;
     private int customSize;
+    private Boolean delivered;
 
-    public CustomService(String deliveryNote, String customerName, String customerPhoneNumber, String assignedDriverID, String status, String itemImage, String itemDeliveryVerificationCode) {
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
+    }
+
+    public CustomService(int position, String deliveryNote, String customerName, String customerPhoneNumber, String assignedDriverID, String status, String itemImage, String itemDeliveryVerificationCode, int customSize, Boolean delivered) {
+        this.position = position;
         this.deliveryNote = deliveryNote;
         this.customerName = customerName;
         this.customerPhoneNumber = customerPhoneNumber;
@@ -20,8 +31,20 @@ public class CustomService extends Service {
         this.status = status;
         this.itemImage = itemImage;
         this.itemDeliveryVerificationCode = itemDeliveryVerificationCode;
-
+        this.customSize = customSize;
+        this.delivered = delivered;
     }
+
+
+
+    public Boolean getDelivered() {
+        return delivered;
+    }
+
+    public void setDelivered(Boolean delivered) {
+        this.delivered = delivered;
+    }
+
 
     public CustomService() {
     }

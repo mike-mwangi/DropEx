@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,6 +33,7 @@ import com.example.dropex.R;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.gson.Gson;
 import com.graphhopper.directions.api.client.model.Address;
@@ -49,6 +51,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -77,6 +80,8 @@ public class ShippingItemFragment extends Fragment implements FetchGeocodingTask
     private ChipGroup sizeChips;
     private TextInputEditText customerPhoneNumberInput;
     public String sizeOfItemString;
+
+    private View fragmentView;
 
 //if item number is negative then this means that we are at the final page an trying to finish
     private int itemNumber;
@@ -111,6 +116,9 @@ public class ShippingItemFragment extends Fragment implements FetchGeocodingTask
        locationInput=view.findViewById(R.id.location_input);
        customerNameTextInput=view.findViewById(R.id.name_of_recipient);
        customerPhoneNumberInput=view.findViewById(R.id.receiver_phone_number_input);
+
+        fragmentView=view;
+
 
        sizeChips.setOnClickListener(new View.OnClickListener() {
            @Override
@@ -170,6 +178,25 @@ public class ShippingItemFragment extends Fragment implements FetchGeocodingTask
     }
 
     public CustomService getService() {
+        if(customerNameTextInput.getText().toString().length()<3){
+            customerNameTextInput.setError("name cannot be null");
+            return null;
+        }
+        if(customerPhoneNumberInput.getText().toString().length()<9)
+        {
+            customerPhoneNumberInput.setError("a valid phone number is at least 9 digits long");
+            return null;
+        }
+        Address address=new Address();
+        if(deliveryLocation==null)
+        {
+            locationInput.setError("please choose a valid location");
+            return null;
+        }else {
+            address.setLat(deliveryLocation.getPoint().getLat());
+            address.setLon(deliveryLocation.getPoint().getLng());
+            address.setName(deliveryLocation.getName());
+        }
         String customerName=customerNameTextInput.getText().toString();
         String deliveryNote=itemNote.getText().toString();
         String customerPhoneNumber=customerPhoneNumberInput.getText().toString();
@@ -182,38 +209,38 @@ public class ShippingItemFragment extends Fragment implements FetchGeocodingTask
         service.setCustomSize(sizeOfItem);
 
         Stop stop=new Stop();
-        Address address=new Address();
-        address.setLat(deliveryLocation.getPoint().getLat());
-        address.setLon(deliveryLocation.getPoint().getLng());
-        address.setName(deliveryLocation.getName());
+
         stop.setAddress(address);
         service.setAddress(address);
 
         String shimentId=customerName+customerPhoneNumber;
         service.setId(shimentId);
-        service.setName("pickup and deliver to me");
+        service.setName("delivery to "+ customerName);
         long maxT=9222036;
         service.setMaxTimeInVehicle(maxT);
+        service.setItemDeliveryVerificationCode(generateVerificationCode());
 
-        if(service.getCustomerName()==""){
-            service=null;
-        }
-        else if(service.getCustomerPhoneNumber()=="")
-        {
-            service=null;
-        }
-        else if(service.getDeliveryNote()=="")
-        {
-            service=null;
-        } else if(deliveryLocation==null)
-        {
-            service=null;
-        }
+
 
 
         return service;
     }
 
+    public String generateVerificationCode() {
+        int leftLimit = 48; // numeral '0'
+        int rightLimit = 122; // letter 'z'
+        int targetStringLength = 10;
+        Random random = new Random();
+
+        String generatedString = random.ints(leftLimit, rightLimit + 1)
+                .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+                .limit(targetStringLength)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
+
+        System.out.println(generatedString);
+        return generatedString;
+    }
     @Override
     public void onError(int message) {
 
@@ -236,5 +263,6 @@ public class ShippingItemFragment extends Fragment implements FetchGeocodingTask
         deliveryLocation=location;
         locationInput.setText(location.getCountry()+","+location.getCity()+","+location.getName());
     }
+
 
 }

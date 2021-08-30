@@ -5,6 +5,15 @@ public class DriverModel {
 
     private String firstName, lastName, phoneNumber, email, city,userImageUrl;
     private CustomVehicle vehicle;
+    private PostedJob currentJob;
+
+    public PostedJob getCurrentJob() {
+        return currentJob;
+    }
+
+    public void setCurrentJob(PostedJob currentJob) {
+        this.currentJob = currentJob;
+    }
 
     public CustomVehicle getVehicle() {
         return vehicle;
@@ -16,7 +25,7 @@ public class DriverModel {
 
     public DriverModel() {}
 
-    public DriverModel(String firstName, String lastName, String phoneNumber, String email, String city, String userImageUrl, CustomVehicle vehicle) {
+    public DriverModel(String firstName, String lastName, String phoneNumber, String email, String city, String userImageUrl, CustomVehicle vehicle, PostedJob currentJob) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.phoneNumber = phoneNumber;
@@ -24,6 +33,7 @@ public class DriverModel {
         this.city = city;
         this.userImageUrl = userImageUrl;
         this.vehicle = vehicle;
+        this.currentJob = currentJob;
     }
 
     public String getUserImageUrl() {

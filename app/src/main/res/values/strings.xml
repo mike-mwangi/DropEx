@@ -160,5 +160,6 @@
     <string name="recieve_package">Recieve a package</string>
     <string name="receive_package">Receive a package</string>
     <string name="track">Track</string>
+    <string name="order">Deliver or Get a delivery</string>
 
 </resources>

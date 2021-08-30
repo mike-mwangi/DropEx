@@ -26,6 +26,11 @@ import com.example.dropex.UserClient;
 import com.firebase.ui.auth.data.model.User;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.graphhopper.directions.api.client.model.GeocodingLocation;
 
 import org.jetbrains.annotations.NotNull;
@@ -67,7 +72,23 @@ public class JobInformationFragment extends Fragment implements FetchGeocodingTa
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        currentCustomer=((UserClient)getActivity().getApplicationContext()).getCustomer();
+        if(((UserClient)getActivity().getApplicationContext()).getCustomer() != null) {
+            currentCustomer = ((UserClient) getActivity().getApplicationContext()).getCustomer();
+        }
+        else {
+           FirebaseDatabase.getInstance().getReference("Customers").child(FirebaseAuth.getInstance().getUid()).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    currentCustomer =snapshot.getValue(CustomerModel.class);
+                    ((UserClient) getActivity().getApplicationContext()).setCustomer(currentCustomer);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+        }
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -116,15 +137,29 @@ public class JobInformationFragment extends Fragment implements FetchGeocodingTa
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                JobInformationFragmentDirections.ActionJobInformationToShippingInformation action =
-                        JobInformationFragmentDirections.actionJobInformationToShippingInformation();
-                int quantity = Integer.parseInt(amount.getText().toString());
-                action.setNumberOfShipments(quantity);
-                currentCustomer.setCurrentJob(new Job());
-                currentCustomer.getCurrentJob().setPickUpLocation(pickupLocation);
-                ((UserClient)getActivity().getApplicationContext()).setCustomer(currentCustomer);
-                Navigation.findNavController(view).navigate(action);
+                if(amount.getText().toString().length()>0 && pickupLocation!=null) {
+                    JobInformationFragmentDirections.ActionJobInformationToShippingInformation action =
+                            JobInformationFragmentDirections.actionJobInformationToShippingInformation();
+                    int quantity = Integer.parseInt(amount.getText().toString());
+                    action.setNumberOfShipments(quantity);
+                    currentCustomer.setCurrentJob(new Job());
+                    currentCustomer.getCurrentJob().setPickUpLocation(pickupLocation);
+                    ((UserClient) getActivity().getApplicationContext()).setCustomer(currentCustomer);
+                    Navigation.findNavController(view).navigate(action);
+                }
+                else {
+                    if(pickupLocation==null) {
+                        locationInput.setError("please choose a valid pick up location");
+                    }
+                    if(amount.getText().toString().length()<1){
+
+
+                            amount.setError("at least one package needs to be delivered");
+
+                    }
+                }
             }
+
         });
 
     }

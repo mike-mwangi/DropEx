@@ -27,6 +27,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -65,6 +66,28 @@ public class TrackingService extends Service {
                 driverModel=dataSnapshot.getValue(DriverModel.class);
                 mLocationProviderClient = LocationServices.getFusedLocationProviderClient(TrackingService.this);
                 setUpLocationRequest();
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                CollectionReference jobRef = db.collection("PostedJob").document(driverModel.getVehicle().getCustomVehicleType().getProfile().getValue()).collection("jobs");
+                jobRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                        for (DocumentChange dc : value.getDocumentChanges()) {
+                            switch (dc.getType()) {
+                                case ADDED:
+                                    Log.d("TRACKING SERVICE", "New city: " + dc.getDocument().getData());
+                                    List<DocumentSnapshot> documents = value.getDocuments();
+                                    String userID = documents.get(0).get("userID").toString();
+                                    String jobID=documents.get(0).get("jobID").toString();
+                                    String pickUpLocation=documents.get(0).get("pickUpLocation").toString();
+                                    JobNotification.notify(TrackingService.this, "Job Alert",
+                                            "A new Job is available at "+ pickUpLocation,userID,jobID);
+                                    break;
+                            }
+                        }
+
+                    }
+
+                });
             }
         });
     }
@@ -72,8 +95,8 @@ public class TrackingService extends Service {
 
     private void setUpLocationRequest() {
         locationRequest = LocationRequest.create();
-        locationRequest.setInterval(10000);
-        locationRequest.setFastestInterval(5000);
+        locationRequest.setInterval(30000);
+        locationRequest.setFastestInterval(15000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
@@ -149,11 +172,13 @@ public class TrackingService extends Service {
                         public void onSuccess(Void aVoid) {
                             //
                             Log.i("tag", "Location update saved");
-                            LocationNotification.notify(TrackingService.this, "Location Tracking",
+                        /*    LocationNotification.notify(TrackingService.this, "Location Tracking",
                                     "Lat:" + lastLocation.getLatitude() + " - Lng:" + lastLocation.getLongitude());
+
+                         */
                         }
                     });
-
+/*
                     jobRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
                         @Override
                         public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
@@ -168,6 +193,8 @@ public class TrackingService extends Service {
 
                         }
                     });
+
+ */
 
 
                    /* LocationNotification.notify(TrackingService.this, "Location Tracking",
