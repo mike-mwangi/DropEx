@@ -51,6 +51,12 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.androidstudy.daraja.Daraja;
+import com.androidstudy.daraja.DarajaListener;
+import com.androidstudy.daraja.model.AccessToken;
+import com.androidstudy.daraja.model.LNMExpress;
+import com.androidstudy.daraja.model.LNMResult;
+import com.androidstudy.daraja.util.TransactionType;
 import com.bumptech.glide.Glide;
 import com.example.driverapplication.Model.CustomService;
 import com.example.driverapplication.Model.DriverModel;
@@ -143,7 +149,7 @@ import retrofit2.Response;
 
 
 public class NavigationLauncherActivity extends AppCompatActivity implements OnMapReadyCallback, OnRouteSelectionChangeListener,
-        PermissionsListener , SharedPreferences.OnSharedPreferenceChangeListener {
+        PermissionsListener , SharedPreferences.OnSharedPreferenceChangeListener,ShipmentItemFragment.onClickConfirmationCode{
 
     private static final int CAMERA_ANIMATION_DURATION = 1000;
     private static final int DEFAULT_CAMERA_ZOOM = 16;
@@ -233,6 +239,8 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     private ShipmentItemVIewPagerAdapter adapter;
     private int currentPage;
     private BottomSheetBehavior bottomSheetBehavior;
+    private Daraja daraja;
+    private String userID;
 
 
     @Override
@@ -240,8 +248,20 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         super.onCreate(savedInstanceState);
         myReceiver = new MyReceiver();
         setContentView(R.layout.activity_navigation_launcher);
+        navigationView = findViewById(R.id.nav_view);
+        init();
+        View headerView = navigationView.getHeaderView(0);
+        TextView text_name = (TextView) headerView.findViewById(R.id.text_name);
         if(((DriverClient)getApplicationContext()).getDriver() != null) {
             driverModel = ((DriverClient)getApplicationContext()).getDriver();
+            img_avatar = (ImageView) headerView.findViewById(R.id.user_avatar);
+            Glide
+                    .with(this)
+                    .load(driverModel.getUserImageUrl())
+                    .into(img_avatar);
+
+
+            text_name.setText(driverModel.getFirstName() + " " + driverModel.getLastName());
         }
         else {
             FirebaseDatabase.getInstance().getReference("Drivers").child(FirebaseAuth.getInstance().getUid()).addValueEventListener(new ValueEventListener() {
@@ -249,6 +269,15 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     driverModel=snapshot.getValue(DriverModel.class);
                     ((DriverClient)getApplicationContext()).setDriver(driverModel);
+                    img_avatar = (ImageView) headerView.findViewById(R.id.user_avatar);
+                    Glide
+                            .with(NavigationLauncherActivity.this)
+                            .load(driverModel.getUserImageUrl())
+                            .into(img_avatar);
+
+
+                    text_name.setText(driverModel.getFirstName() + " " + driverModel.getLastName());
+
                 }
 
                 @Override
@@ -290,7 +319,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         localeUtils = new LocaleUtils();
 
         drawer = findViewById(R.id.drawer_layout);
-        navigationView = findViewById(R.id.nav_view);
+
         toolbar = findViewById(R.id.toolbar);
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -309,6 +338,18 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
 
         init();
         showFirstStartIfNecessary();
+        daraja = Daraja.with("1EjOGAeLTgwnwZA8QcVupAJdbWFGpeVe", "LGbGd5inl4jCQYn8", new DarajaListener<AccessToken>() {
+            @Override
+            public void onResult(@NonNull AccessToken accessToken) {
+                Log.i(NavigationLauncherActivity.this.getClass().getSimpleName(), accessToken.getAccess_token());
+                Toast.makeText(NavigationLauncherActivity.this, "TOKEN : " + accessToken.getAccess_token(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.e(NavigationLauncherActivity.this.getClass().getSimpleName(), error);
+            }
+        });
 
     }
 
@@ -343,17 +384,9 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         });
 
         //Populate user data
-        View headerView = navigationView.getHeaderView(0);
-        TextView text_name = (TextView) headerView.findViewById(R.id.text_name);
-
-        img_avatar = (ImageView) headerView.findViewById(R.id.user_avatar);
-        Glide
-                .with(this)
-                .load(driverModel.getUserImageUrl())
-                .into(img_avatar);
 
 
-        text_name.setText(driverModel.getFirstName() + " " + driverModel.getLastName());
+
 
 
     }
@@ -425,7 +458,8 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
                 Uri data = intent.getData();
                 if (data.getQueryParameter("JOBID") != null) {
                     String jobID = data.getQueryParameter("JOBID");
-                    final Task<DocumentSnapshot> getJobSnapshot = FirebaseFirestore.getInstance().collection("users").document(data.getQueryParameter("userID")).collection("jobs").document(jobID).get();
+                    userID = data.getQueryParameter("userID");
+                    final Task<DocumentSnapshot> getJobSnapshot = FirebaseFirestore.getInstance().collection("users").document(userID).collection("jobs").document(jobID).get();
                     getJobSnapshot.addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                         @Override
                         public void onSuccess(DocumentSnapshot documentSnapshot) {
@@ -435,16 +469,17 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
                                 // Remove the first point if we want to start from the current location
 
                             }
-                            FirebaseFirestore.getInstance().collection("PostedJob").document(driverModel.getVehicle().getCustomVehicleType().getProfile().getValue()).collection("jobs").document(data.getQueryParameter("userID")).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+
+                            FirebaseFirestore.getInstance().collection("PostedJob").document(driverModel.getVehicle().getCustomVehicleType().getProfile().getValue()).collection("jobs").document(userID).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void unused) {
                                     Map<String,Object> driverID=new HashMap<>();
                                     driverID.put("assignedDriver",FirebaseAuth.getInstance().getUid());
-                                    FirebaseFirestore.getInstance().collection("users").document(data.getQueryParameter("userID")).collection("jobs").document(jobID).set(driverID);
+                                    FirebaseFirestore.getInstance().collection("users").document(userID).collection("jobs").document(jobID).update(driverID);
 
                                 }
                             });
-                            driverModel.setCurrentJob(new PostedJob(jobID,data.getQueryParameter("userID"),""));
+                            driverModel.setCurrentJob(new PostedJob(jobID, userID,""));
                             FirebaseDatabase.getInstance().getReference("Drivers").child(FirebaseAuth.getInstance().getUid()).setValue(driverModel);
 
 
@@ -474,7 +509,9 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
 
             ShipmentItemFragment shipmentItemFragment = ShipmentItemFragment.newInstance(services.get(i), i);
             shipmentItemFragment.setServices(services);
+            ShipmentItemFragment.setOnClickConfirmationCode(this);
             fragments.add(shipmentItemFragment);
+
 
 
         }
@@ -702,6 +739,54 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
                 hideLoading();
             }
         });
+    }
+    @Override
+    public void onClickConfirmationCode(boolean isValid,int position) {
+        if((fragments.size()-1)>1){
+            fragments.remove(position);
+        }
+        else{
+
+            Task<DataSnapshot> customers = FirebaseDatabase.getInstance().getReference("Customers").child(userID).get();
+            customers.addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+                @Override
+                public void onSuccess(DataSnapshot dataSnapshot) {
+                    String mobileNumber=dataSnapshot.child("phoneNumber").getValue().toString();
+                    String substring = mobileNumber.substring(4);
+                    mobileNumber="0"+substring;
+                    Log.e("phone number",mobileNumber);
+                    String amount=job.getSolution().getCosts().toString();
+                    LNMExpress lnmExpress = new LNMExpress(
+                            "174379", //Business Shortcode. Use as-is for sandbox environment
+                            "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919",  // Use as-is for sandbox environment
+                            TransactionType.CustomerPayBillOnline, //Paybill transaction
+                            amount, //Amount to be paid...Hardcoded
+                            "254708374149", //Party A - Use as-is for sandbox environment
+                            "174379",  //Business Shortcode. Use as-is for sandbox environment
+                            "0705512356", //Party B - Where to send STKPUSH
+                            "https://e833-102-222-145-74.ngrok.io/api/stkpush", //Callback url to receive processed request from Mpesa
+                            "BILL005", //Receipt number. Generate random strings to avoid duplicates
+                            "Pay Bill" //TransactionType
+                    );
+
+                    daraja.requestMPESAExpress(lnmExpress,
+                            new DarajaListener<LNMResult>() {
+                                @Override
+                                public void onResult(@NonNull LNMResult lnmResult) {
+                                    Log.i(NavigationLauncherActivity.this.getClass().getSimpleName(), lnmResult.ResponseDescription);
+                                }
+
+                                @Override
+                                public void onError(String error) {
+                                    Log.i(NavigationLauncherActivity.this.getClass().getSimpleName(), error);
+                                }
+                            }
+                    );
+
+                }
+            });
+
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -1138,6 +1223,8 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     public void startWork(View view) {
 
     }
+
+
 
 
     private class MyReceiver extends BroadcastReceiver {

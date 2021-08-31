@@ -40,6 +40,19 @@ public class ShipmentItemFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
     private ArrayList<CustomService> services=new ArrayList<>();
     private int position;
+    public  static onClickConfirmationCode onClickConfirmationCode;
+
+    public static ShipmentItemFragment.onClickConfirmationCode getOnClickConfirmationCode() {
+        return onClickConfirmationCode;
+    }
+
+    public static void setOnClickConfirmationCode(ShipmentItemFragment.onClickConfirmationCode onClickConfirmationCode1) {
+        onClickConfirmationCode = onClickConfirmationCode1;
+    }
+
+    public interface onClickConfirmationCode{
+        public void onClickConfirmationCode(boolean isValid,int position);
+    }
 
     public int getPosition() {
         return position;
@@ -146,13 +159,16 @@ public class ShipmentItemFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 String s = codeInput.getEditText().getText().toString();
-                if(service.getItemDeliveryVerificationCode().toLowerCase(Locale.ROOT)==s.toLowerCase(Locale.ROOT))
+                if(service.getItemDeliveryVerificationCode().equals(s))
                 {
                     DocumentReference document = FirebaseFirestore.getInstance().collection("users").document(driverModel.getCurrentJob().getUserID()).collection("jobs").document(driverModel.getCurrentJob().getJobID());
                     services.get(position).setStatus("delivered");
                     services.get(position).setDelivered(true);
                     document.update("services", services);
+                    com.example.driverapplication.ui.bottomSheet.ShipmentItemFragment.onClickConfirmationCode.onClickConfirmationCode(true,position);
                 }
+
+
             }
         });
 

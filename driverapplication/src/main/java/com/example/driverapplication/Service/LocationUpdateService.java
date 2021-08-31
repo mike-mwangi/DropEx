@@ -171,6 +171,7 @@ public class LocationUpdateService extends Service {
                         for (DocumentChange dc : value.getDocumentChanges()) {
                             switch (dc.getType()) {
                                 case ADDED:
+                                case MODIFIED:
                                     Log.d("TRACKING SERVICE", "New city: " + dc.getDocument().getData());
                                     List<DocumentSnapshot> documents = value.getDocuments();
                                     String userID = documents.get(0).get("userID").toString();

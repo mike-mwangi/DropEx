@@ -12,6 +12,9 @@ public class ShipmentItemVIewPagerAdapter extends FragmentStateAdapter{
         private ArrayList<ShipmentItemFragment> fragments = new ArrayList<ShipmentItemFragment>();
 
 
+
+
+
         public ShipmentItemVIewPagerAdapter(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle) {
             super(fragmentManager, lifecycle);
         }

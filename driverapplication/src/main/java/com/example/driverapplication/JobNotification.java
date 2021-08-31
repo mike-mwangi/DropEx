@@ -42,8 +42,8 @@ public class JobNotification  {
         Uri uri=new Uri.Builder().appendQueryParameter("JOBID",jobID).appendQueryParameter("userID",userID).build();
         iStopService.setData(uri);
         PendingIntent piStopService = PendingIntent.getActivity(
-                context, 0, iStopService, 0);
-        Notification.Action action= new Notification.Action.Builder(R.drawable.ic_launcher_foreground,"Accept",piStopService).build();
+                context, 0, iStopService, PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_CANCEL_CURRENT);
+        Notification.Action action= new Notification.Action.Builder(R.mipmap.ic_launcher_foreground,"Accept",piStopService).build();
 
         Notification notification = new Notification.Builder(context, channelId)
 
@@ -58,7 +58,7 @@ public class JobNotification  {
 
 
                 .addAction(
-                        R.drawable.ic_launcher_foreground,"Accept",piStopService)
+                        R.mipmap.ic_launcher_foreground,"Accept",piStopService)
 
                 // Automatically dismiss the notification when it is touched.
                 .setAutoCancel(false).build();
@@ -94,8 +94,8 @@ public class JobNotification  {
         Uri uri=new Uri.Builder().appendQueryParameter("JOBID",jobID).appendQueryParameter("userID",userID).build();
         iStopService.setData(uri);
         PendingIntent piStopService = PendingIntent.getActivity(
-                context, 0, iStopService,0);
-        NotificationCompat.Action action= new NotificationCompat.Action.Builder(R.drawable.ic_launcher_foreground,"Accept",piStopService).build();
+                context, 0, iStopService,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_CANCEL_CURRENT);
+        NotificationCompat.Action action= new NotificationCompat.Action.Builder(R.mipmap.ic_launcher_foreground,"Accept",piStopService).build();
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
 
                 // Set appropriate defaults for the notification light, sound,

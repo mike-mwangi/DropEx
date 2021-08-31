@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.dropex.Model.CustomerModel;
@@ -71,7 +70,7 @@ public class ProfileFragment extends Fragment{
     @Override
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        user_avatar=view.findViewById(R.id.user_image);
+        user_avatar=view.findViewById(R.id.driver_image);
         fname=view.findViewById(R.id.fname);
         surname=view.findViewById(R.id.surname);
         phone=view.findViewById(R.id.phone_number);

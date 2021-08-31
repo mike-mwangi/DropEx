@@ -3,7 +3,6 @@ package com.example.dropex;
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,20 +10,14 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 
 import android.provider.Settings;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,26 +26,18 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
 
 import com.bumptech.glide.Glide;
-import com.example.dropex.Common.BottomSheetHandler;
-import com.example.dropex.Common.Common;
 import com.example.dropex.Model.ConstantVehicleTypes;
 import com.example.dropex.Model.CustomerModel;
 import com.example.dropex.Model.Job;
 import com.example.dropex.Model.JobSolution;
 import com.example.dropex.Model.LocationTrackingModel;
 import com.example.dropex.Model.PostedJob;
-import com.example.dropex.ui.home.HomeActivity;
 import com.example.dropex.ui.job.JobsActivity;
-import com.example.dropex.ui.main.SplashScreenActivity;
 import com.example.dropex.ui.profile.ProfileActivity;
 import com.example.dropex.ui.shipments.main.CallToActionActivity;
 import com.example.dropex.utils.AppExecutor;
@@ -63,6 +48,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textview.MaterialTextView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -71,19 +57,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.FirebaseMessagingService;
-import com.google.firebase.messaging.RemoteMessage;
 
-import com.graphhopper.directions.api.client.model.GeocodingLocation;
-import com.graphhopper.directions.api.client.model.GeocodingPoint;
-import com.graphhopper.directions.api.client.model.RoutePoint;
 import com.graphhopper.directions.api.client.model.Solution;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
@@ -97,10 +78,8 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
-import com.mapbox.mapboxsdk.annotations.MarkerView;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
-import com.mapbox.mapboxsdk.constants.Style;
 import com.mapbox.mapboxsdk.exceptions.InvalidLatLngBoundsException;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
@@ -110,31 +89,20 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Telemetry;
 import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode;
-import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
-import okhttp3.Callback;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -199,7 +167,15 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     private Job job;
     private MaterialButton CTOButton;
     private ArrayList<Marker> bikeVehicleMarkers=new ArrayList<>();
+    private ArrayList<MarkerOptions> markerOptionsArrayList=new ArrayList<>();
     private String intentDriverID="";
+    private LinearProgressIndicator linearProgressIndicator;
+    private ConstraintLayout vehiclesLayout;
+    private ConstraintLayout welcomeLayout;
+    private ConstraintLayout driver_view;
+    private ImageView driverImage;
+    private MaterialTextView driverName;
+    private MaterialTextView carPlate;
 
 
     @Override
@@ -221,22 +197,33 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         capacityBikeTextView= bottomSheet.findViewById(R.id.explain_why_bikes);
         capacityCarTextView= bottomSheet.findViewById(R.id.explain_why_cars);
         capacityTruckTextView= bottomSheet.findViewById(R.id.explain_why_trucks);
+        linearProgressIndicator=bottomSheet.findViewById(R.id.linear_progress_indicator);
+        vehiclesLayout=bottomSheet.findViewById(R.id.vehicleContainer);
         bikes=bottomSheet.findViewById(R.id.bikes);
         vans=bottomSheet.findViewById(R.id.trucks);
         cars=bottomSheet.findViewById(R.id.cars);
         setOnClickListenerForCards();
-        bikes.setVisibility(View.GONE);
-        cars.setVisibility(View.GONE);
-        vans.setVisibility(View.GONE);
-
+       welcomeLayout=bottomSheet.findViewById(R.id.welcomeContainer);
         CTOButton=bottomSheet.findViewById(R.id.call_to_action_button);
         heyText=bottomSheet.findViewById(R.id.hey);
+        driver_view=bottomSheet.findViewById(R.id.driver_view);
+        driverImage=bottomSheet.findViewById(R.id.driver_image);
+        driverName=bottomSheet.findViewById(R.id.driver_name);
+        carPlate=bottomSheet.findViewById(R.id.car_number_plate);
+
+
+        vehiclesLayout.setVisibility(View.GONE);
+        driver_view.setVisibility(View.GONE);
+        welcomeLayout.setVisibility(View.VISIBLE);
+
+
         CTOButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(NavigationLauncherActivity.this,CallToActionActivity.class));
             }
         });
+
 
         BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
 
@@ -287,6 +274,8 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
                     @Override
                     public void onSuccess(Void unused) {
                         //TODO : show progressbar;
+                        showLoadingBottomSheet();
+
                         FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getUid()).collection("jobs").document(job.getJobID()).addSnapshotListener(new EventListener<DocumentSnapshot>() {
                             @Override
                             public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
@@ -295,6 +284,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
                                     //hide loading
                                     Log.e(" driver id fetched",job1.getAssignedDriver());
                                     fetchLocationUpdates(job1.getAssignedDriver());
+                                    updateBottomSheet(job1.getAssignedDriver());
                                     job=job1;
 
                                 }
@@ -307,6 +297,37 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
 
             }
         });
+    }
+    public void showLoadingBottomSheet(){
+        welcomeLayout.setVisibility(View.GONE);
+        vehiclesLayout.setVisibility(View.GONE);
+        linearProgressIndicator.setIndeterminate(true);
+        linearProgressIndicator.setVisibility(View.VISIBLE);
+    }
+    public void hideLoadingBottomSheet(){
+        welcomeLayout.setVisibility(View.GONE);
+        vehiclesLayout.setVisibility(View.GONE);
+        linearProgressIndicator.setIndeterminate(true);
+        linearProgressIndicator.setVisibility(View.GONE);
+    }
+
+    public void updateBottomSheet(String driverID)
+    {
+        Task<DataSnapshot> drivers = FirebaseDatabase.getInstance().getReference("Drivers").child(driverID).get();
+        drivers.addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot) {
+
+                Glide.with(NavigationLauncherActivity.this).load(dataSnapshot.child("userImageUrl").getValue().toString()).into(driverImage);
+                driverName.setText(dataSnapshot.child("firstName").getValue().toString());
+                carPlate.setText(dataSnapshot.child("vehicle").child("vehiclePlateNumber").getValue().toString());
+                hideLoadingBottomSheet();
+                driver_view.setVisibility(View.VISIBLE);
+            }
+        });
+
+
+
     }
 
 
@@ -482,11 +503,8 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
                             // Remove the first point if we want to start from the current location
 
                         }
-                        bikes.setVisibility(View.VISIBLE);
-                        cars.setVisibility(View.VISIBLE);
-                        vans.setVisibility(View.VISIBLE);
-                        CTOButton.setVisibility(View.GONE);
-                        heyText.setVisibility(View.GONE);
+                      vehiclesLayout.setVisibility(View.VISIBLE);
+                        welcomeLayout.setVisibility(View.GONE);
                         setVehiclePrices(job.getSolution().getCosts());
                         updateWaypoints(points);
 
@@ -628,18 +646,41 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
             ref.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
                 public void onEvent(@Nullable @org.jetbrains.annotations.Nullable QuerySnapshot value, @Nullable @org.jetbrains.annotations.Nullable FirebaseFirestoreException error) {
+
+
                     List<LocationTrackingModel> types = value.toObjects(LocationTrackingModel.class);
                     locationTrackingModelArrayList.addAll(types);
+                    int i=0;
+
+                    for (DocumentChange dc : value.getDocumentChanges()) {
+                        LatLng latLng = new LatLng(types.get(dc.getNewIndex()).getLatitude(), types.get(dc.getNewIndex()).getLongitude());
+                        switch (dc.getType()) {
+                            case ADDED:
 
 
-                    for (LocationTrackingModel vehicle : locationTrackingModelArrayList) {
-                        MarkerOptions markerOptions = new MarkerOptions();
-                        markerOptions.setIcon(IconFactory.getInstance(NavigationLauncherActivity.this.getApplicationContext()).fromResource(R.mipmap.car_icon_foreground));
-                        LatLng latLng = new LatLng(vehicle.getLatitude(), vehicle.getLongitude());
-                        markerOptions.setPosition(latLng);
+                                //  for (LocationTrackingModel vehicle : locationTrackingModelArrayList) {
+                                MarkerOptions markerOptions = new MarkerOptions();
+                                markerOptions.setIcon(IconFactory.getInstance(NavigationLauncherActivity.this.getApplicationContext()).fromResource(R.mipmap.car_icon_foreground));
 
-                        Marker marker = mapboxMap.addMarker(markerOptions);
-                        bikeVehicleMarkers.add(marker);
+                                markerOptions.setPosition(latLng);
+
+                                markerOptionsArrayList.add(markerOptions);
+                                Marker marker = mapboxMap.addMarker(markerOptions);
+                                bikeVehicleMarkers.add(marker);
+                                break;
+                            case MODIFIED:
+                                bikeVehicleMarkers.get(dc.getNewIndex()).setPosition(latLng);
+
+                                mapboxMap.updateMarker(bikeVehicleMarkers.get(dc.getNewIndex()));
+                                break;
+                            case REMOVED:
+                                mapboxMap.removeMarker(bikeVehicleMarkers.get(dc.getOldIndex()));
+                                bikeVehicleMarkers.remove(dc.getOldIndex());
+                                break;
+
+
+                        }
+                        i++;
 
                     }
                 }
@@ -658,10 +699,9 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
              public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
                  LocationTrackingModel locationTrackingModel = value.toObject(LocationTrackingModel.class);
                  MarkerOptions markerOptions = new MarkerOptions();
-                 markerOptions.setIcon(IconFactory.getInstance(NavigationLauncherActivity.this.getApplicationContext()).fromResource(R.mipmap.truck_icon_foreground));
+                 markerOptions.setIcon(IconFactory.getInstance(NavigationLauncherActivity.this.getApplicationContext()).fromResource(R.mipmap.tracking_car_foreground));
                  LatLng latLng = new LatLng(locationTrackingModel.getLatitude(), locationTrackingModel.getLongitude());
                  markerOptions.setPosition(latLng);
-
                  mapboxMap.addMarker(markerOptions);
              }
          });
