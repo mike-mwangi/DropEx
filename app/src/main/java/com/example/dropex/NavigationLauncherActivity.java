@@ -39,10 +39,10 @@ import com.example.dropex.Model.JobSolution;
 import com.example.dropex.Model.LocationTrackingModel;
 import com.example.dropex.Model.PostedJob;
 import com.example.dropex.ui.job.JobsActivity;
+import com.example.dropex.ui.main.SplashScreenActivity;
 import com.example.dropex.ui.profile.ProfileActivity;
 import com.example.dropex.ui.shipments.main.CallToActionActivity;
 import com.example.dropex.utils.AppExecutor;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -171,7 +171,11 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     private Job job;
     private MaterialButton CTOButton;
     private ArrayList<Marker> bikeVehicleMarkers=new ArrayList<>();
-    private ArrayList<MarkerOptions> markerOptionsArrayList=new ArrayList<>();
+    private ArrayList<MarkerOptions> bikeMarkerOptionsArrayList =new ArrayList<>();
+    private ArrayList<Marker> carVehicleMarkers=new ArrayList<>();
+    private ArrayList<MarkerOptions> carMarkerOptionsArrayList =new ArrayList<>();
+    private ArrayList<Marker> truckVehicleMarkers=new ArrayList<>();
+    private ArrayList<MarkerOptions> truckMarkerOptionsArrayList =new ArrayList<>();
     private String intentDriverID="";
     private LinearProgressIndicator linearProgressIndicator;
     private ConstraintLayout vehiclesLayout;
@@ -427,7 +431,7 @@ private FloatingActionButton floatingActionButton;
     private void init() {
         navigationView.setNavigationItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_sign_out) {
-                /*
+
                 androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(NavigationLauncherActivity.this);
                 builder.setTitle("Sign out")
                         .setMessage("Are you sure you want to sign out?")
@@ -442,9 +446,6 @@ private FloatingActionButton floatingActionButton;
                 androidx.appcompat.app.AlertDialog dialog = builder.create();
 
                 dialog.show();
-
-                 */
-                launchNavigationWithRoute();
             }
             else if(item.getItemId() == R.id.nav_home){
                startActivity(new Intent(this, JobsActivity.class));
@@ -747,7 +748,7 @@ private FloatingActionButton floatingActionButton;
 
                                 markerOptions.setPosition(latLng);
 
-                                markerOptionsArrayList.add(markerOptions);
+                                bikeMarkerOptionsArrayList.add(markerOptions);
                                 Marker marker = mapboxMap.addMarker(markerOptions);
                                 bikeVehicleMarkers.add(marker);
                                 break;
@@ -789,18 +790,18 @@ private FloatingActionButton floatingActionButton;
 
                                 markerOptions.setPosition(latLng);
 
-                                markerOptionsArrayList.add(markerOptions);
+                                truckMarkerOptionsArrayList.add(markerOptions);
                                 Marker marker = mapboxMap.addMarker(markerOptions);
-                                bikeVehicleMarkers.add(marker);
+                                truckVehicleMarkers.add(marker);
                                 break;
                             case MODIFIED:
-                                bikeVehicleMarkers.get(dc.getNewIndex()).setPosition(latLng);
+                                truckVehicleMarkers.get(dc.getNewIndex()).setPosition(latLng);
 
-                                mapboxMap.updateMarker(bikeVehicleMarkers.get(dc.getNewIndex()));
+                                mapboxMap.updateMarker(truckVehicleMarkers.get(dc.getNewIndex()));
                                 break;
                             case REMOVED:
-                                mapboxMap.removeMarker(bikeVehicleMarkers.get(dc.getOldIndex()));
-                                bikeVehicleMarkers.remove(dc.getOldIndex());
+                                mapboxMap.removeMarker(truckVehicleMarkers.get(dc.getOldIndex()));
+                                truckVehicleMarkers.remove(dc.getOldIndex());
                                 break;
 
 
@@ -831,18 +832,18 @@ private FloatingActionButton floatingActionButton;
 
                                 markerOptions.setPosition(latLng);
 
-                                markerOptionsArrayList.add(markerOptions);
+                                carMarkerOptionsArrayList.add(markerOptions);
                                 Marker marker = mapboxMap.addMarker(markerOptions);
-                                bikeVehicleMarkers.add(marker);
+                                carVehicleMarkers.add(marker);
                                 break;
                             case MODIFIED:
-                                bikeVehicleMarkers.get(dc.getNewIndex()).setPosition(latLng);
+                                carVehicleMarkers.get(dc.getNewIndex()).setPosition(latLng);
 
-                                mapboxMap.updateMarker(bikeVehicleMarkers.get(dc.getNewIndex()));
+                                mapboxMap.updateMarker(carVehicleMarkers.get(dc.getNewIndex()));
                                 break;
                             case REMOVED:
-                                mapboxMap.removeMarker(bikeVehicleMarkers.get(dc.getOldIndex()));
-                                bikeVehicleMarkers.remove(dc.getOldIndex());
+                                mapboxMap.removeMarker(carVehicleMarkers.get(dc.getOldIndex()));
+                                carVehicleMarkers.remove(dc.getOldIndex());
                                 break;
 
 
@@ -860,6 +861,16 @@ private FloatingActionButton floatingActionButton;
                     mapboxMap.removeMarker(marker);
                 }
             }
+            if(!carVehicleMarkers.isEmpty()){
+                for(Marker marker:carVehicleMarkers){
+                    mapboxMap.removeMarker(marker);
+                }
+            }
+            if(!truckVehicleMarkers.isEmpty()){
+                for(Marker marker:truckVehicleMarkers){
+                    mapboxMap.removeMarker(marker);
+                }
+            }
             DatabaseReference drivers1= FirebaseDatabase.getInstance().getReference("Drivers").child(driverID);
             drivers1.addValueEventListener(new ValueEventListener() {
                 @Override
@@ -874,10 +885,10 @@ private FloatingActionButton floatingActionButton;
                         public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
                             LocationTrackingModel locationTrackingModel = value.toObject(LocationTrackingModel.class);
                             MarkerOptions markerOptions = new MarkerOptions();
-                            if(dvalue.getVehicle().getCustomVehicleType().getProfile().getValue().toString().equals("SMALL_TRUCK")){
+                            if(dvalue.getVehicle().getCustomVehicleType().getProfile().getValue().equals(ConstantVehicleTypes.getVanVehicleType().getProfile().getValue())){
                                 markerOptions.setIcon(IconFactory.getInstance(NavigationLauncherActivity.this.getApplicationContext()).fromResource(R.mipmap.tracking_truck_foreground));
                             }
-                            else if(dvalue.getVehicle().getCustomVehicleType().getProfile().getValue().toString().equals("BIKE")){
+                            else if(dvalue.getVehicle().getCustomVehicleType().getProfile().getValue().equals(ConstantVehicleTypes.getBikeVehicleType().getProfile().getValue())){
                                 markerOptions.setIcon(IconFactory.getInstance(NavigationLauncherActivity.this.getApplicationContext()).fromResource(R.mipmap.tracking_bike_foreground));
                             }
                             else {
