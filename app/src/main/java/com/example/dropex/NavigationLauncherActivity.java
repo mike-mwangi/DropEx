@@ -33,6 +33,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import com.bumptech.glide.Glide;
 import com.example.dropex.Model.ConstantVehicleTypes;
 import com.example.dropex.Model.CustomerModel;
+import com.example.dropex.Model.DriverModel;
 import com.example.dropex.Model.Job;
 import com.example.dropex.Model.JobSolution;
 import com.example.dropex.Model.LocationTrackingModel;
@@ -41,6 +42,7 @@ import com.example.dropex.ui.job.JobsActivity;
 import com.example.dropex.ui.profile.ProfileActivity;
 import com.example.dropex.ui.shipments.main.CallToActionActivity;
 import com.example.dropex.utils.AppExecutor;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -55,6 +57,7 @@ import com.google.android.material.textview.MaterialTextView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.CollectionReference;
@@ -720,8 +723,94 @@ private FloatingActionButton floatingActionButton;
     private ArrayList<LocationTrackingModel> fetchLocationUpdates(String driverID) {
         if(driverID=="") {
             FirebaseFirestore db = FirebaseFirestore.getInstance();
-            CollectionReference ref = db.collection("driverLocation");
+            CollectionReference ref = db.collection("driverLocation").document(ConstantVehicleTypes.getBikeVehicleType().getProfile().getValue().toString()).collection("locations");
+            CollectionReference ref1 = db.collection("driverLocation").document(ConstantVehicleTypes.getVanVehicleType().getProfile().getValue().toString()).collection("locations");
+            CollectionReference ref2= db.collection("driverLocation").document(ConstantVehicleTypes.getCarVehicleType().getProfile().getValue().toString()).collection("locations");
             ref.addSnapshotListener(new EventListener<QuerySnapshot>() {
+                @Override
+                public void onEvent(@Nullable @org.jetbrains.annotations.Nullable QuerySnapshot value, @Nullable @org.jetbrains.annotations.Nullable FirebaseFirestoreException error) {
+
+
+                    List<LocationTrackingModel> types = value.toObjects(LocationTrackingModel.class);
+                    locationTrackingModelArrayList.addAll(types);
+                    int i=0;
+
+                    for (DocumentChange dc : value.getDocumentChanges()) {
+                        LatLng latLng = new LatLng(types.get(dc.getNewIndex()).getLatitude(), types.get(dc.getNewIndex()).getLongitude());
+                        switch (dc.getType()) {
+                            case ADDED:
+
+
+                                //  for (LocationTrackingModel vehicle : locationTrackingModelArrayList) {
+                                MarkerOptions markerOptions = new MarkerOptions();
+                                markerOptions.setIcon(IconFactory.getInstance(NavigationLauncherActivity.this.getApplicationContext()).fromResource(R.mipmap.scooter_icon_foreground));
+
+                                markerOptions.setPosition(latLng);
+
+                                markerOptionsArrayList.add(markerOptions);
+                                Marker marker = mapboxMap.addMarker(markerOptions);
+                                bikeVehicleMarkers.add(marker);
+                                break;
+                            case MODIFIED:
+                                bikeVehicleMarkers.get(dc.getNewIndex()).setPosition(latLng);
+
+                                mapboxMap.updateMarker(bikeVehicleMarkers.get(dc.getNewIndex()));
+                                break;
+                            case REMOVED:
+                                mapboxMap.removeMarker(bikeVehicleMarkers.get(dc.getOldIndex()));
+                                bikeVehicleMarkers.remove(dc.getOldIndex());
+                                break;
+
+
+                        }
+                        i++;
+
+                    }
+                }
+            });
+            ref1.addSnapshotListener(new EventListener<QuerySnapshot>() {
+                @Override
+                public void onEvent(@Nullable @org.jetbrains.annotations.Nullable QuerySnapshot value, @Nullable @org.jetbrains.annotations.Nullable FirebaseFirestoreException error) {
+
+
+                    List<LocationTrackingModel> types = value.toObjects(LocationTrackingModel.class);
+                    locationTrackingModelArrayList.addAll(types);
+                    int i=0;
+
+                    for (DocumentChange dc : value.getDocumentChanges()) {
+                        LatLng latLng = new LatLng(types.get(dc.getNewIndex()).getLatitude(), types.get(dc.getNewIndex()).getLongitude());
+                        switch (dc.getType()) {
+                            case ADDED:
+
+
+                                //  for (LocationTrackingModel vehicle : locationTrackingModelArrayList) {
+                                MarkerOptions markerOptions = new MarkerOptions();
+                                markerOptions.setIcon(IconFactory.getInstance(NavigationLauncherActivity.this.getApplicationContext()).fromResource(R.mipmap.truck_icon_foreground));
+
+                                markerOptions.setPosition(latLng);
+
+                                markerOptionsArrayList.add(markerOptions);
+                                Marker marker = mapboxMap.addMarker(markerOptions);
+                                bikeVehicleMarkers.add(marker);
+                                break;
+                            case MODIFIED:
+                                bikeVehicleMarkers.get(dc.getNewIndex()).setPosition(latLng);
+
+                                mapboxMap.updateMarker(bikeVehicleMarkers.get(dc.getNewIndex()));
+                                break;
+                            case REMOVED:
+                                mapboxMap.removeMarker(bikeVehicleMarkers.get(dc.getOldIndex()));
+                                bikeVehicleMarkers.remove(dc.getOldIndex());
+                                break;
+
+
+                        }
+                        i++;
+
+                    }
+                }
+            });
+            ref2.addSnapshotListener(new EventListener<QuerySnapshot>() {
                 @Override
                 public void onEvent(@Nullable @org.jetbrains.annotations.Nullable QuerySnapshot value, @Nullable @org.jetbrains.annotations.Nullable FirebaseFirestoreException error) {
 
@@ -763,6 +852,7 @@ private FloatingActionButton floatingActionButton;
                     }
                 }
             });
+
         }
         else {
             if(!bikeVehicleMarkers.isEmpty()){
@@ -770,19 +860,45 @@ private FloatingActionButton floatingActionButton;
                     mapboxMap.removeMarker(marker);
                 }
             }
-            FirebaseFirestore db = FirebaseFirestore.getInstance();
-            DocumentReference ref = db.collection("driverLocation").document(driverID);
-         ref.addSnapshotListener(new EventListener<DocumentSnapshot>() {
-             @Override
-             public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
-                 LocationTrackingModel locationTrackingModel = value.toObject(LocationTrackingModel.class);
-                 MarkerOptions markerOptions = new MarkerOptions();
-                 markerOptions.setIcon(IconFactory.getInstance(NavigationLauncherActivity.this.getApplicationContext()).fromResource(R.mipmap.tracking_car_foreground));
-                 LatLng latLng = new LatLng(locationTrackingModel.getLatitude(), locationTrackingModel.getLongitude());
-                 markerOptions.setPosition(latLng);
-                 mapboxMap.addMarker(markerOptions);
-             }
-         });
+            DatabaseReference drivers1= FirebaseDatabase.getInstance().getReference("Drivers").child(driverID);
+            drivers1.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    FirebaseFirestore db = FirebaseFirestore.getInstance();
+                    DriverModel dvalue = snapshot.getValue(DriverModel.class);
+
+                    Log.e(" driver vehicle type", dvalue.getVehicle().getCustomVehicleType().getProfile().getValue().toString());
+                    DocumentReference ref = db.collection("driverLocation").document(dvalue.getVehicle().getCustomVehicleType().getProfile().getValue().toString()).collection("locations").document(driverID);
+                    ref.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                        @Override
+                        public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+                            LocationTrackingModel locationTrackingModel = value.toObject(LocationTrackingModel.class);
+                            MarkerOptions markerOptions = new MarkerOptions();
+                            if(dvalue.getVehicle().getCustomVehicleType().getProfile().getValue().toString().equals("SMALL_TRUCK")){
+                                markerOptions.setIcon(IconFactory.getInstance(NavigationLauncherActivity.this.getApplicationContext()).fromResource(R.mipmap.tracking_truck_foreground));
+                            }
+                            else if(dvalue.getVehicle().getCustomVehicleType().getProfile().getValue().toString().equals("BIKE")){
+                                markerOptions.setIcon(IconFactory.getInstance(NavigationLauncherActivity.this.getApplicationContext()).fromResource(R.mipmap.tracking_bike_foreground));
+                            }
+                            else {
+                                markerOptions.setIcon(IconFactory.getInstance(NavigationLauncherActivity.this.getApplicationContext()).fromResource(R.mipmap.tracking_car_foreground));
+                            }
+
+                            //markerOptions.setIcon(IconFactory.getInstance(NavigationLauncherActivity.this.getApplicationContext()).fromResource(R.mipmap.tracking_car_foreground));
+                            LatLng latLng = new LatLng(locationTrackingModel.getLatitude(), locationTrackingModel.getLongitude());
+                            markerOptions.setPosition(latLng);
+                            mapboxMap.addMarker(markerOptions);
+                        }
+                    });
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+
         }
 
 /*

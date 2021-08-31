@@ -478,7 +478,7 @@ public class LocationUpdateService extends Service {
 
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        DocumentReference ref = db.collection("driverLocation").document(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        DocumentReference ref = db.collection("driverLocation").document(driverModel.getVehicle().getCustomVehicleType().getProfile().getValue()).collection("locations").document(FirebaseAuth.getInstance().getCurrentUser().getUid());
         CollectionReference jobRef = db.collection("PostedJob").document(driverModel.getVehicle().getCustomVehicleType().getProfile().getValue()).collection("jobs");
 
 
