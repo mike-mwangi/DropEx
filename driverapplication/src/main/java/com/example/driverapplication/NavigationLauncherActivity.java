@@ -763,8 +763,8 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
                             amount, //Amount to be paid...Hardcoded
                             "254708374149", //Party A - Use as-is for sandbox environment
                             "174379",  //Business Shortcode. Use as-is for sandbox environment
-                            "0705512356", //Party B - Where to send STKPUSH
-                            "https://e833-102-222-145-74.ngrok.io/api/stkpush", //Callback url to receive processed request from Mpesa
+                            mobileNumber, //Party B - Where to send STKPUSH
+                            "https://308b-105-161-97-145.ngrok.io/api/stkpush", //Callback url to receive processed request from Mpesa
                             "BILL005", //Receipt number. Generate random strings to avoid duplicates
                             "Pay Bill" //TransactionType
                     );

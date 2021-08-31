@@ -21,20 +21,23 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/welcomeContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/welcomeContainer">
+        android:visibility="visible">
+
         <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/hey"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="Hey there !"
-        android:textAlignment="center"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+            android:id="@+id/hey"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="Hey there !"
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/call_to_action_button"
@@ -219,25 +222,27 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
+
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/driver_image"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_marginStart="136dp"
-            android:layout_marginTop="28dp"
+            android:layout_width="130dp"
+            android:layout_height="130dp"
+            android:layout_marginStart="142dp"
+            android:layout_marginTop="36dp"
             android:src="@drawable/ic_baseline_account_circle_24"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:shapeAppearance="@style/ShapeAppearanceOverlay.MyTheme.RoundComponent" />
+            app:shapeAppearance="@style/ShapeAppearanceOverlay.MyTheme.RoundComponent"
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyTheme.RoundComponent" />
 
         <TextView
             android:id="@+id/driver_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
+            android:layout_marginStart="150dp"
             android:layout_marginTop="8dp"
             android:text="Name:James"
-            android:textAppearance="?attr/textAppearanceBody2"
+            android:textAppearance="?attr/textAppearanceHeadline6"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/driver_image" />
 
@@ -245,12 +250,34 @@
             android:id="@+id/car_number_plate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
+            android:layout_marginStart="120dp"
             android:layout_marginTop="8dp"
             android:text="car plate no:KXB456"
-            android:textAppearance="?attr/textAppearanceBody2"
+            android:textAppearance="@style/TextAppearance.MyTheme.Body1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/driver_name" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/phoneNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="122dp"
+            android:layout_marginTop="8dp"
+            android:text="12345678"
+            android:textAppearance="@style/TextAppearance.MyTheme.Subtitle1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/car_number_plate" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/call"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="176dp"
+            android:layout_marginTop="24dp"
+            android:src="@drawable/ic_baseline_call_24"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/phoneNumber" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

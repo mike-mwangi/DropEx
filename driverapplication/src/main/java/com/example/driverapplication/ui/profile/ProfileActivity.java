@@ -167,7 +167,7 @@ public class ProfileActivity extends AppCompatActivity implements ProfileFragmen
                         byte[] imagedata = baos.toByteArray();
 
 
-                        StorageReference userImagesRef = storageRef.child("user/profile-images/"+user.getPhoneNumber()+".jpg");
+                        StorageReference userImagesRef = storageRef.child("user/profile-images/"+driverModel.getPhoneNumber()+".jpg");
                         uploadTask = userImagesRef.putBytes(imagedata);
 
                         // Register observers to listen for when the download is done or if it fails
@@ -208,7 +208,7 @@ public class ProfileActivity extends AppCompatActivity implements ProfileFragmen
                     if (resultCode == RESULT_OK && data != null) {
                         Uri selectedImage = data.getData();
                         
-                        StorageReference riversRef = storageRef.child("user/profile-images/"+user.getPhoneNumber()+".jpg");
+                        StorageReference riversRef = storageRef.child("user/profile-images/"+driverModel.getPhoneNumber()+".jpg");
                         uploadTask = riversRef.putFile(selectedImage);
 
 // Register observers to listen for when the download is done or if it fails

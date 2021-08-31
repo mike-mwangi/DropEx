@@ -47,6 +47,7 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
@@ -176,7 +177,8 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     private ImageView driverImage;
     private MaterialTextView driverName;
     private MaterialTextView carPlate;
-
+    private MaterialTextView phoneNumber;
+private FloatingActionButton floatingActionButton;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -210,6 +212,9 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
         driverImage=bottomSheet.findViewById(R.id.driver_image);
         driverName=bottomSheet.findViewById(R.id.driver_name);
         carPlate=bottomSheet.findViewById(R.id.car_number_plate);
+        phoneNumber=bottomSheet.findViewById(R.id.phoneNumber);
+        floatingActionButton=bottomSheet.findViewById(R.id.call);
+
 
 
         vehiclesLayout.setVisibility(View.GONE);
@@ -297,6 +302,70 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
 
             }
         });
+        cars.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PostedJob postedJob=new PostedJob(job.getJobID(),FirebaseAuth.getInstance().getUid(),job.getPickUpLocation().getName());
+                Task<Void> postJob = FirebaseFirestore.getInstance().collection("PostedJob").document(ConstantVehicleTypes.getCarVehicleType().getProfile().getValue()).collection("jobs").document(FirebaseAuth.getInstance().getUid()).set(postedJob);
+                postJob.addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        //TODO : show progressbar;
+                        showLoadingBottomSheet();
+
+                        FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getUid()).collection("jobs").document(job.getJobID()).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                            @Override
+                            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+                                Job job1= value.toObject(Job.class);
+                                if(job1.getAssignedDriver()!=null){
+                                    //hide loading
+                                    Log.e(" driver id fetched",job1.getAssignedDriver());
+                                    fetchLocationUpdates(job1.getAssignedDriver());
+                                    updateBottomSheet(job1.getAssignedDriver());
+                                    job=job1;
+
+                                }
+                            }
+                        });
+
+                    }
+                });
+
+
+            }
+        });
+        vans.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PostedJob postedJob=new PostedJob(job.getJobID(),FirebaseAuth.getInstance().getUid(),job.getPickUpLocation().getName());
+                Task<Void> postJob = FirebaseFirestore.getInstance().collection("PostedJob").document(ConstantVehicleTypes.getVanVehicleType().getProfile().getValue()).collection("jobs").document(FirebaseAuth.getInstance().getUid()).set(postedJob);
+                postJob.addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        //TODO : show progressbar;
+                        showLoadingBottomSheet();
+
+                        FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().getUid()).collection("jobs").document(job.getJobID()).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                            @Override
+                            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+                                Job job1= value.toObject(Job.class);
+                                if(job1.getAssignedDriver()!=null){
+                                    //hide loading
+                                    Log.e(" driver id fetched",job1.getAssignedDriver());
+                                    fetchLocationUpdates(job1.getAssignedDriver());
+                                    updateBottomSheet(job1.getAssignedDriver());
+                                    job=job1;
+
+                                }
+                            }
+                        });
+
+                    }
+                });
+
+
+            }
+        });
     }
     public void showLoadingBottomSheet(){
         welcomeLayout.setVisibility(View.GONE);
@@ -320,9 +389,18 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
 
                 Glide.with(NavigationLauncherActivity.this).load(dataSnapshot.child("userImageUrl").getValue().toString()).into(driverImage);
                 driverName.setText(dataSnapshot.child("firstName").getValue().toString());
-                carPlate.setText(dataSnapshot.child("vehicle").child("vehiclePlateNumber").getValue().toString());
+                carPlate.setText("Vehicle: " +dataSnapshot.child("vehicle").child("vehiclePlateNumber").getValue().toString());
+                phoneNumber.setText("phone no.: "+dataSnapshot.child("phoneNumber").getValue().toString());
+                floatingActionButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", dataSnapshot.child("phoneNumber").getValue().toString(), null));
+                        startActivity(intent);
+                    }
+                });
                 hideLoadingBottomSheet();
                 driver_view.setVisibility(View.VISIBLE);
+                vehiclesLayout.setVisibility(View.GONE);
             }
         });
 
@@ -333,10 +411,10 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
 
 
     private void setVehiclePrices(Integer cost){
-        int bikePrice=cost*2;
+        int bikePrice=cost;
         bikePriceTextView.setText(String.valueOf(bikePrice)+" Kshs");
-        carPriceTextView.setText(String.valueOf(cost*2.7)+" Kshs");
-        truckPriceTextView.setText(String.valueOf(cost*3)+" Kshs");
+        carPriceTextView.setText(String.valueOf(cost*1.5)+" Kshs");
+        truckPriceTextView.setText(String.valueOf(cost*2)+" Kshs");
         capacityBikeTextView.setText("capacity < 5kg");
         capacityCarTextView.setText("capacity < 200kg");
         capacityTruckTextView.setText("capacity < 1000kg");
