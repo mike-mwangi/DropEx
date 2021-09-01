@@ -610,7 +610,7 @@ private FloatingActionButton floatingActionButton;
     private void showHelpDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.help_message_title);
-        builder.setMessage(Html.fromHtml("1. Please note, this is a demo and not a full featured application. The purpose of this application is to provide an easy starting point for developers to create a navigation application with GraphHopper<br/>2. You should enable your GPS/location<br/>3.You can either search for a location using the magnifier icon or by long pressing on the map<br/>4. Start the navigation by tapping the arrow button<br/><br/>This project is 100% open source, contributions are welcome.<br/><br/>Please drive carefully and always abide local law and signs. Roads might be impassible due to construction projects, traffic, weather, or other events."));
+        builder.setMessage(Html.fromHtml("1. Agree to dropex's terms and conditions : ...."));
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         builder.setPositiveButton(R.string.agree, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
